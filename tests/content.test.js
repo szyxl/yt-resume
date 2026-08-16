@@ -33,6 +33,7 @@ class FakeEventTarget {
 class FakeElement extends FakeEventTarget {
   constructor() {
     super();
+    this.attributes = new Map();
     this.children = [];
     this.classList = {
       add() {},
@@ -53,13 +54,24 @@ class FakeElement extends FakeEventTarget {
 
   remove() {}
 
-  setAttribute() {}
+  getAttribute(name) {
+    return this.attributes.get(name) || null;
+  }
+
+  hasAttribute(name) {
+    return this.attributes.has(name);
+  }
+
+  setAttribute(name, value) {
+    this.attributes.set(name, String(value));
+  }
 }
 
 class FakeVideo extends FakeEventTarget {
   constructor(player) {
     super();
     this.player = player;
+    this.assignedTimes = [];
     this._currentTime = 303;
     this.duration = 900;
     this.ended = false;
@@ -73,6 +85,7 @@ class FakeVideo extends FakeEventTarget {
   }
 
   set currentTime(value) {
+    this.assignedTimes.push(value);
     this._currentTime = value;
     queueMicrotask(() => this.dispatchEvent({ type: "seeked" }));
   }
@@ -82,11 +95,13 @@ class FakeVideo extends FakeEventTarget {
   }
 }
 
-test("a YouTube Home resume link does not override the newer local checkpoint", async () => {
+test("local checkpoints survive YouTube SPA player changes", async () => {
   const realSetTimeout = globalThis.setTimeout;
   const realClearTimeout = globalThis.clearTimeout;
   const player = new FakeElement();
   const video = new FakeVideo(player);
+  const watchPage = new FakeElement();
+  watchPage.setAttribute("video-id", "dQw4w9WgXcQ");
   const document = new FakeEventTarget();
   document.head = {};
   document.referrer = "";
@@ -98,6 +113,9 @@ test("a YouTube Home resume link does not override the newer local checkpoint", 
     }
     if (selector === ".html5-video-player") {
       return player;
+    }
+    if (selector === "ytd-watch-flexy") {
+      return watchPage;
     }
     return null;
   };
@@ -113,7 +131,7 @@ test("a YouTube Home resume link does not override the newer local checkpoint", 
       if (message.type === "settings:get") {
         return Promise.resolve({ enabled: true, retentionDays: 90 });
       }
-      if (message.type === "progress:get") {
+      if (message.type === "progress:get" && message.videoId === "dQw4w9WgXcQ") {
         return Promise.resolve({
           videoId: "dQw4w9WgXcQ",
           writerId: "saved",
@@ -121,6 +139,16 @@ test("a YouTube Home resume link does not override the newer local checkpoint", 
           position: 431,
           duration: 900,
           updatedAt: 1,
+        });
+      }
+      if (message.type === "progress:get" && message.videoId === "otherVideo1") {
+        return Promise.resolve({
+          videoId: "otherVideo1",
+          writerId: "saved",
+          activityAt: 2,
+          position: 1200,
+          duration: 3600,
+          updatedAt: 2,
         });
       }
       return Promise.resolve(null);
@@ -154,6 +182,20 @@ test("a YouTube Home resume link does not override the newer local checkpoint", 
 
     await new Promise((resolve) => realSetTimeout(resolve, 30));
     assert.equal(video.currentTime, 431);
+
+    document.dispatchEvent({ type: "yt-navigate-start" });
+    globalThis.location.href = "https://www.youtube.com/watch?v=otherVideo1&t=157s";
+    document.dispatchEvent({ type: "yt-navigate-finish" });
+
+    realSetTimeout(() => {
+      watchPage.setAttribute("video-id", "otherVideo1");
+      video.duration = 3600;
+      video.currentTime = 157;
+      video.dispatchEvent({ type: "loadedmetadata" });
+    }, 12);
+
+    await new Promise((resolve) => realSetTimeout(resolve, 40));
+    assert.equal(video.currentTime, 1200, `Player assignments: ${video.assignedTimes.join(", ")}`);
   } finally {
     globalThis.setTimeout = realSetTimeout;
     globalThis.clearTimeout = realClearTimeout;

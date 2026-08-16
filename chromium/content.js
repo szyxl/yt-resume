@@ -18,6 +18,7 @@
   const SAVE_INTERVAL_MS = 5000;
   const INITIAL_PLAYER_CHECK_INTERVAL_MS = 100;
   const MAX_PLAYER_CHECK_INTERVAL_MS = 1000;
+  const PLAYER_CONTEXT_SETTLE_TIMEOUT_MS = 5000;
   const RESTORE_SETTLE_MS = 300;
   const TOAST_LIFETIME_MS = 5000;
 
@@ -89,7 +90,20 @@
     return null;
   }
 
-  function waitForPlayableVideo(session) {
+  function durationsLikelyMatch(first, second) {
+    const firstDuration = Number(first);
+    const secondDuration = Number(second);
+    if (!Number.isFinite(firstDuration) || !Number.isFinite(secondDuration)) {
+      return false;
+    }
+
+    const tolerance = Math.max(2, Math.min(firstDuration * 0.001, 5));
+    return Math.abs(firstDuration - secondDuration) <= tolerance;
+  }
+
+  function waitForPlayableVideo(session, expectedDuration) {
+    const startedAt = Date.now();
+
     return new Promise((resolve) => {
       function check() {
         if (!isCurrentSessionForLocation(session)) {
@@ -101,8 +115,16 @@
         const hasMetadata = video
           && video.readyState >= HTMLMediaElement.HAVE_METADATA
           && (Number.isFinite(video.duration) ? video.duration > 0 : video.duration === Infinity);
+        const watchPage = document.querySelector("ytd-watch-flexy");
+        const pageVideoId = watchPage?.getAttribute("video-id") || "";
+        const pageContextMatches = !pageVideoId || pageVideoId === session.context.videoId;
+        const expectedDurationIsKnown = Number.isFinite(Number(expectedDuration));
+        const durationMatches = !expectedDurationIsKnown
+          || durationsLikelyMatch(expectedDuration, video?.duration);
+        const playerContextMatches = (pageContextMatches && durationMatches)
+          || Date.now() - startedAt >= PLAYER_CONTEXT_SETTLE_TIMEOUT_MS;
 
-        if (hasMetadata && !isAdPlaying(video)) {
+        if (hasMetadata && playerContextMatches && !isAdPlaying(video)) {
           resolve(video);
           return;
         }
@@ -582,7 +604,7 @@
       return;
     }
 
-    const video = await waitForPlayableVideo(session);
+    const video = await waitForPlayableVideo(session, record?.duration);
     if (!video || !isCurrentSessionForLocation(session)) {
       return;
     }
