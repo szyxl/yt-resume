@@ -24,25 +24,30 @@ test("parses standard YouTube watch URLs by video ID", () => {
   assert.deepEqual(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL123"), {
     videoId: "dQw4w9WgXcQ",
     hasExplicitTimestamp: false,
+    timestampSeconds: null,
   });
 });
 
-test("detects explicit timestamp variants", () => {
-  assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s").hasExplicitTimestamp, true);
-  assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&start=42").hasExplicitTimestamp, true);
-  assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ#t=42").hasExplicitTimestamp, true);
+test("detects and parses explicit timestamp variants", () => {
+  assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s").timestampSeconds, 42);
+  assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&start=42").timestampSeconds, 42);
+  assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ#t=42").timestampSeconds, 42);
+  assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=1h2m3s").timestampSeconds, 3723);
+  assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=invalid").hasExplicitTimestamp, true);
+  assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=invalid").timestampSeconds, null);
 });
 
-test("YouTube browse resume links do not override local checkpoints", () => {
+test("YouTube browse resume links use the local checkpoint unless the URL is over a minute ahead", () => {
   const plainContext = parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-  const timestampContext = parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=303s");
+  const timestampContext = parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=157s");
 
-  assert.equal(shouldRestoreCheckpoint(plainContext, ""), true);
-  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/"), true);
-  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/feed/history"), true);
-  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/watch?v=aqz-KE-bpKQ"), false);
-  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://example.com/"), false);
-  assert.equal(shouldRestoreCheckpoint(timestampContext, ""), false);
+  assert.equal(shouldRestoreCheckpoint(plainContext, "", 80), true);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/", 80), false);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/", 97), true);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/feed/history", 431), true);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/watch?v=aqz-KE-bpKQ", 80), false);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://example.com/", 80), false);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, "", 80), false);
 });
 
 test("rejects Shorts, Music, malformed IDs, and non-YouTube URLs", () => {

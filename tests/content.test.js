@@ -115,7 +115,7 @@ test("a YouTube Home resume link does not override the newer local checkpoint", 
       }
       if (message.type === "progress:get") {
         return Promise.resolve({
-          videoId: "itT_U_NIcaI",
+          videoId: "testVideo01",
           writerId: "saved",
           activityAt: 1,
           position: 431,
@@ -149,7 +149,7 @@ test("a YouTube Home resume link does not override the newer local checkpoint", 
     await new Promise((resolve) => realSetTimeout(resolve, 10));
 
     document.dispatchEvent({ type: "yt-navigate-start" });
-    globalThis.location.href = "https://www.youtube.com/watch?v=itT_U_NIcaI&t=303s";
+    globalThis.location.href = "https://www.youtube.com/watch?v=testVideo01&t=303s";
     document.dispatchEvent({ type: "yt-navigate-finish" });
 
     await new Promise((resolve) => realSetTimeout(resolve, 30));

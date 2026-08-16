@@ -601,7 +601,7 @@
     publicState.reason = record ? "Checkpoint ready." : "No checkpoint saved yet.";
     publicState.title = getVideoTitle();
 
-    if (record && shouldRestoreCheckpoint(context, navigationSourceUrl)) {
+    if (record && shouldRestoreCheckpoint(context, navigationSourceUrl, record.position)) {
       if (isRestorable(record.position, video.duration)) {
         await restorePosition(session, record);
       } else if (isNearCompletion(record.position, video.duration)) {

@@ -19,6 +19,7 @@
   const RETENTION_OPTIONS = Object.freeze([7, 30, 90, 180, 365, 0]);
   const PROGRESS_KEY_PREFIX = "progress:";
   const VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
+  const YOUTUBE_RESUME_LEAD_TOLERANCE_SECONDS = 60;
 
   function normalizeSettings(input) {
     const source = input && typeof input === "object" ? input : {};
@@ -30,6 +31,29 @@
       enabled: typeof source.enabled === "boolean" ? source.enabled : DEFAULT_SETTINGS.enabled,
       retentionDays,
     };
+  }
+
+  function parseTimestampSeconds(value) {
+    const normalized = typeof value === "string" ? value.trim().toLowerCase() : "";
+    if (!normalized) {
+      return null;
+    }
+
+    if (/^\d+(?:\.\d+)?s?$/.test(normalized)) {
+      const seconds = Number.parseFloat(normalized);
+      return Number.isFinite(seconds) ? seconds : null;
+    }
+
+    const units = normalized.match(/^(?:(\d+(?:\.\d+)?)h)?(?:(\d+(?:\.\d+)?)m)?(?:(\d+(?:\.\d+)?)s)?$/);
+    if (!units || !units.slice(1).some((part) => typeof part === "string")) {
+      return null;
+    }
+
+    const hours = Number(units[1]) || 0;
+    const minutes = Number(units[2]) || 0;
+    const seconds = Number(units[3]) || 0;
+    const total = hours * 60 * 60 + minutes * 60 + seconds;
+    return Number.isFinite(total) ? total : null;
   }
 
   function parseVideoContext(value) {
@@ -51,8 +75,22 @@
     }
 
     const hash = url.hash.replace(/^#/, "");
-    const hasHashTimestamp = new URLSearchParams(hash.replace(/^\?/, "")).has("t")
-      || /(?:^|[&#])t=/.test(hash);
+    const hashParams = new URLSearchParams(hash.replace(/^\?/, ""));
+    const hasHashTimestamp = hashParams.has("t") || /(?:^|[&#])t=/.test(hash);
+    const timestampValues = [
+      url.searchParams.has("t") ? url.searchParams.get("t") : null,
+      url.searchParams.has("start") ? url.searchParams.get("start") : null,
+      url.searchParams.has("time_continue") ? url.searchParams.get("time_continue") : null,
+      hashParams.has("t") ? hashParams.get("t") : null,
+    ];
+    let timestampSeconds = null;
+    for (const timestampValue of timestampValues) {
+      const parsedTimestamp = parseTimestampSeconds(timestampValue);
+      if (parsedTimestamp !== null) {
+        timestampSeconds = parsedTimestamp;
+        break;
+      }
+    }
 
     return {
       videoId,
@@ -61,6 +99,7 @@
         || url.searchParams.has("start")
         || url.searchParams.has("time_continue")
         || hasHashTimestamp,
+      timestampSeconds,
     };
   }
 
@@ -92,12 +131,26 @@
       || url.pathname.startsWith("/user/");
   }
 
-  function shouldRestoreCheckpoint(context, navigationSourceUrl = "") {
+  function shouldRestoreCheckpoint(context, navigationSourceUrl = "", checkpointPosition) {
     if (!context) {
       return false;
     }
 
-    return !context.hasExplicitTimestamp || isYouTubeBrowseSource(navigationSourceUrl);
+    if (!context.hasExplicitTimestamp) {
+      return true;
+    }
+
+    if (!isYouTubeBrowseSource(navigationSourceUrl)) {
+      return false;
+    }
+
+    const timestampSeconds = Number(context.timestampSeconds);
+    const localPosition = Number(checkpointPosition);
+    if (!Number.isFinite(timestampSeconds) || !Number.isFinite(localPosition)) {
+      return true;
+    }
+
+    return timestampSeconds <= localPosition + YOUTUBE_RESUME_LEAD_TOLERANCE_SECONDS;
   }
 
   function formatTime(value) {

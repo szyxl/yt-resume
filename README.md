@@ -6,7 +6,8 @@ A Firefox and Chromium extension that privately saves and restores playback posi
 
 - Restores one local checkpoint per YouTube video.
 - Saves every five seconds and on pause, seek, navigation, and page exit.
-- Lets explicit timestamp links override the saved checkpoint.
+- Lets direct timestamp links override the saved checkpoint.
+- For videos opened from YouTube browse pages, uses YouTube's timestamp when it is more than one minute ahead of the local checkpoint.
 - Ignores positions below five seconds and clears completed or nearly completed videos.
 - Supports 7, 30, 90, 180, 365-day, or unlimited retention; the default is 7 days.
 - Supports regular `youtube.com/watch` videos, including playlist links.

@@ -1,6 +1,6 @@
 {
   "name": "yt-resume",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "private": true,
   "license": "GPL-3.0-only",
   "description": "A local-first Firefox and Chromium extension that resumes standard YouTube videos.",
