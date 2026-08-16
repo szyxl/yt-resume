@@ -56,7 +56,7 @@
     return Number.isFinite(total) ? total : null;
   }
 
-  function parseVideoContext(value) {
+  function parseWatchUrl(value) {
     let url;
 
     try {
@@ -70,10 +70,21 @@
     }
 
     const videoId = url.searchParams.get("v") || "";
-    if (!VIDEO_ID_PATTERN.test(videoId)) {
+    return VIDEO_ID_PATTERN.test(videoId) ? { url, videoId } : null;
+  }
+
+  function isRadioMixUrl(value) {
+    const match = parseWatchUrl(value);
+    return Boolean(match && match.url.searchParams.get("start_radio") === "1");
+  }
+
+  function parseVideoContext(value) {
+    const match = parseWatchUrl(value);
+    if (!match || match.url.searchParams.get("start_radio") === "1") {
       return null;
     }
 
+    const { url, videoId } = match;
     const hash = url.hash.replace(/^#/, "");
     const hashParams = new URLSearchParams(hash.replace(/^\?/, ""));
     const hasHashTimestamp = hashParams.has("t") || /(?:^|[&#])t=/.test(hash);
@@ -284,6 +295,7 @@
     isExpired,
     isNearCompletion,
     isProgressKey,
+    isRadioMixUrl,
     isRestorable,
     isVerifiedCompletion,
     matchesVideoContext,

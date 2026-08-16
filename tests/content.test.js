@@ -95,7 +95,7 @@ class FakeVideo extends FakeEventTarget {
   }
 }
 
-test("local checkpoints survive YouTube SPA player changes", async () => {
+test("radio mixes are skipped and local checkpoints survive YouTube SPA player changes", async () => {
   const realSetTimeout = globalThis.setTimeout;
   const realClearTimeout = globalThis.clearTimeout;
   const player = new FakeElement();
@@ -125,9 +125,14 @@ test("local checkpoints survive YouTube SPA player changes", async () => {
     realSetTimeout(callback, Math.min(milliseconds, 2), ...args);
   globalThis.clearTimeout = realClearTimeout;
   globalThis.YTResume = require("../firefox/logic.js");
+  const sentMessages = [];
+  let messageListener = null;
   globalThis.YTResumeBrowser = {
-    addMessageListener() {},
+    addMessageListener(listener) {
+      messageListener = listener;
+    },
     sendRuntimeMessage(message) {
+      sentMessages.push(message);
       if (message.type === "settings:get") {
         return Promise.resolve({ enabled: true, retentionDays: 90 });
       }
@@ -175,6 +180,16 @@ test("local checkpoints survive YouTube SPA player changes", async () => {
   try {
     require("../firefox/content.js");
     await new Promise((resolve) => realSetTimeout(resolve, 10));
+
+    document.dispatchEvent({ type: "yt-navigate-start" });
+    globalThis.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&start_radio=1";
+    document.dispatchEvent({ type: "yt-navigate-finish" });
+
+    await new Promise((resolve) => realSetTimeout(resolve, 10));
+    assert.deepEqual(sentMessages, []);
+    const radioState = await messageListener({ type: "page:get-state" });
+    assert.equal(radioState.reasonCode, "radio-mix");
+    assert.equal(radioState.reason, "YouTube Mix and Radio playback isn't saved.");
 
     document.dispatchEvent({ type: "yt-navigate-start" });
     globalThis.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=303s";

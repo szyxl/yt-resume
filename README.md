@@ -10,6 +10,7 @@ A Firefox and Chromium extension that privately saves and restores playback posi
 - Ignores positions below five seconds and clears completed or nearly completed videos.
 - Supports 7, 30, 90, 180, 365-day, or unlimited retention; the default is 7 days.
 - Supports regular `youtube.com/watch` videos, including playlist links.
+- Skips YouTube Mix and Radio playback (`start_radio=1`) so tracks from those sessions do not resume partway through.
 - Does not run in Private Browsing or Incognito and currently excludes Shorts, live streams, premieres, embeds, and YouTube Music.
 
 ## Resource use

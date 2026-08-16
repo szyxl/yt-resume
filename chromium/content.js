@@ -6,6 +6,7 @@
     createLatestTaskQueue,
     formatTime,
     isNearCompletion,
+    isRadioMixUrl,
     isRestorable,
     isVerifiedCompletion,
     matchesVideoContext,
@@ -21,6 +22,7 @@
   const PLAYER_CONTEXT_SETTLE_TIMEOUT_MS = 5000;
   const RESTORE_SETTLE_MS = 300;
   const TOAST_LIFETIME_MS = 5000;
+  const RADIO_MIX_REASON = "YouTube Mix and Radio playback isn't saved.";
 
   let currentSession = null;
   let settings = { ...DEFAULT_SETTINGS };
@@ -39,6 +41,17 @@
       record: null,
       ...overrides,
     };
+  }
+
+  function createUnavailableState(value) {
+    if (isRadioMixUrl(value)) {
+      return createPublicState({
+        reason: RADIO_MIX_REASON,
+        reasonCode: "radio-mix",
+      });
+    }
+
+    return createPublicState();
   }
 
   function makeWriterId() {
@@ -539,7 +552,7 @@
 
     if (!context) {
       stopCurrentSession(true);
-      publicState = createPublicState();
+      publicState = createUnavailableState(location.href);
       return;
     }
 
@@ -645,7 +658,7 @@
   async function getPageState() {
     const context = parseVideoContext(location.href);
     if (!context) {
-      return createPublicState();
+      return createUnavailableState(location.href);
     }
 
     let record = publicState.videoId === context.videoId ? publicState.record : null;

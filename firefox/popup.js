@@ -17,10 +17,20 @@
     elements.feedback.style.color = isError ? "var(--color-danger)" : "";
   }
 
+  function getCounterLabel(state) {
+    if (!state.enabled) {
+      return "Resume paused";
+    }
+
+    if (state.supported) {
+      return "Local checkpoint";
+    }
+
+    return state.reasonCode === "radio-mix" ? "Not saved" : "Not available";
+  }
+
   function render(state) {
-    elements.counterLabel.textContent = state.enabled
-      ? state.supported ? "Local checkpoint" : "Not available"
-      : "Resume paused";
+    elements.counterLabel.textContent = getCounterLabel(state);
     elements.savedTime.textContent = state.record ? formatTime(state.record.position) : "–:––";
     elements.videoTitle.textContent = state.supported
       ? state.title || state.reason || "No checkpoint saved yet."
