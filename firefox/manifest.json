@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "YT Resume",
-  "version": "0.1.0",
-  "description": "Privately saves and restores YouTube playback positions in this Firefox profile.",
+  "version": "0.2.0",
+  "description": "Privately saves and restores YouTube playback positions in this browser profile.",
   "icons": {
     "16": "icons/icon-flat-16.png",
     "32": "icons/icon-flat-32.png",
@@ -17,6 +17,7 @@
   ],
   "background": {
     "scripts": [
+      "browser-api.js",
       "logic.js",
       "background.js"
     ]
@@ -35,6 +36,7 @@
         "https://www.youtube.com/*"
       ],
       "js": [
+        "browser-api.js",
         "logic.js",
         "content.js"
       ],

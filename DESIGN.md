@@ -65,18 +65,6 @@ spacing:
   md: "14px"
   lg: "24px"
 components:
-  button-memory:
-    backgroundColor: "{colors.control-grey}"
-    textColor: "{colors.counter-white}"
-    rounded: "{rounded.control}"
-    padding: "9px 13px"
-    height: "42px"
-  button-memory-hover:
-    backgroundColor: "{colors.signal-white}"
-    textColor: "{colors.display-black}"
-    rounded: "{rounded.control}"
-    padding: "9px 13px"
-    height: "42px"
   button-danger:
     backgroundColor: "{colors.danger-white}"
     textColor: "{colors.display-black}"
@@ -97,14 +85,14 @@ components:
 
 **Creative North Star: "The Memory Counter"**
 
-YT Resume borrows the useful grammar of a dedicated video deck: one unmistakable time counter, a small illuminated memory state, compact transport controls, and labels that say exactly what they do. It feels like dependable hardware living in the browser—not a miniature dashboard and not nostalgic decoration.
+YT Resume borrows the useful grammar of a dedicated video deck: one unmistakable time counter, an understated Settings control, and labels that say exactly what they do. It feels like dependable hardware living in the browser—not a miniature dashboard and not nostalgic decoration.
 
-The world is restrained, monochrome, and precise. Matte black surfaces frame inset display windows; tabular time is the visual anchor; a single white status light makes saved state visible. Motion is limited to state changes that communicate recording, restoration, or deletion.
+The world is restrained, monochrome, and precise. Matte black surfaces frame inset display windows, and tabular time is the visual anchor. Motion is limited to state changes that communicate recording, restoration, or deletion.
 
 **Key Characteristics:**
 - A large tabular timecode is the primary status signal.
 - Matte black planes and inset displays create hierarchy without card grids.
-- One white signal light marks active or saved state.
+- State appears once in the counter label instead of competing badges.
 - Compact literal labels keep controls understandable at toolbar scale.
 - Decorative video nostalgia is excluded; every deck reference must serve a task.
 
@@ -129,15 +117,15 @@ The palette is strictly monochrome. Black and neutral-grey surfaces carry hierar
 - **Counter White:** Primary text and time digits.
 - **Label Grey / Dim Grey:** Secondary copy and inactive status.
 
-**The One Lamp Rule.** Bright white denotes memory or immediate attention. If several unrelated elements compete at once, the system has lost its hierarchy.
+**The One Signal Rule.** Bright white denotes memory or immediate attention. If several unrelated elements compete at once, the system has lost its hierarchy.
 
 ## Typography
 
 **Display Font:** Native tabular monospace stack.
-**Body Font:** Firefox-native system UI stack.
+**Body Font:** Browser-native system UI stack.
 **Label Font:** The system UI stack in compact uppercase.
 
-**Character:** Time values feel fixed, measured, and easy to compare; surrounding copy feels native to Firefox and disappears into the task.
+**Character:** Time values feel fixed, measured, and easy to compare; surrounding copy feels native to the browser and disappears into the task.
 
 ### Hierarchy
 - **Display** (520, responsive 48–58.4px, 0.95): Saved position only, with tabular and slashed-zero features.
@@ -150,7 +138,7 @@ The palette is strictly monochrome. Black and neutral-grey surfaces carry hierar
 
 ## Layout
 
-The popup is a single 342px vertical control deck, not a collection of cards. It reflows without horizontal scrolling at 320px. The display window comes first, followed by the current-video action, then a compact footer rail for enablement and Settings.
+The popup is a single 342px vertical control deck, not a collection of cards. It reflows without horizontal scrolling at 320px. The display window comes first, followed by a compact footer rail for Settings. Enablement and data actions live on the Settings page rather than being duplicated in the popup.
 
 Settings use the same vertical instrument logic at a wider 760px reading measure: section rails, aligned controls, and one clearly isolated danger zone. At 540px and below, settings rows become single-column, selects and buttons become full width, and confirmation actions stack.
 
@@ -170,7 +158,6 @@ The form language is rectilinear with subtly eased 5px control corners and 7px d
 
 ### Buttons
 - **Shape:** Compact eased corners (5px), at least 42px tall.
-- **Memory action:** Neutral at rest; white fill with black text on hover or activation.
 - **Danger action:** White fill with black text, visible only after explicit confirmation.
 - **Focus:** A two-pixel white outline with a two-pixel offset.
 
@@ -187,7 +174,7 @@ The form language is rectilinear with subtly eased 5px control corners and 7px d
 - **Settings action:** A literal text button rather than a gear icon. It stays neutral until hover, then gains a control-grey field and seam.
 
 ### Memory Counter
-- The counter combines a machine label, redundant lamp-plus-text status, oversized saved time, and the transient current video title. An em dash pattern marks absence instead of inventing `0:00` progress.
+- The counter combines one machine-state label, oversized saved time, and the transient current video title. Separate “On” and “Saved” badges are excluded as redundant. An em dash pattern marks absence instead of inventing `0:00` progress.
 
 ## Do's and Don'ts
 

@@ -10,6 +10,7 @@ const {
   progressKey,
   shouldAcceptWrite,
 } = YTResume;
+const { addMessageListener } = YTResumeBrowser;
 
 const SETTINGS_KEY = "settings";
 const TOMBSTONE_LIFETIME_MS = 24 * 60 * 60 * 1000;
@@ -187,7 +188,7 @@ async function handleMessage(message) {
   }
 }
 
-browser.runtime.onMessage.addListener((message) => {
+addMessageListener((message) => {
   if (!message || typeof message.type !== "string") {
     return undefined;
   }

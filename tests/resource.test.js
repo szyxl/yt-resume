@@ -6,17 +6,54 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const projectRoot = path.resolve(__dirname, "..");
+const platforms = ["firefox", "chromium"];
+const sharedRuntimePaths = [
+  "background.js",
+  "browser-api.js",
+  "content.css",
+  "content.js",
+  "icons/icon-flat-16.png",
+  "icons/icon-flat-32.png",
+  "icons/icon-flat-48.png",
+  "icons/icon-flat-96.png",
+  "icons/icon.svg",
+  "logic.js",
+  "options.html",
+  "options.js",
+  "popup.html",
+  "popup.js",
+  "ui.css",
+];
+
+function readPlatformFile(platform, relativePath, encoding = "utf8") {
+  return fs.readFileSync(path.join(projectRoot, platform, relativePath), encoding);
+}
+
+function readManifest(platform) {
+  return JSON.parse(readPlatformFile(platform, "manifest.json"));
+}
 
 test("content script has no permanent interval wakeups", () => {
-  const source = fs.readFileSync(path.join(projectRoot, "content.js"), "utf8");
+  const source = readPlatformFile("firefox", "content.js");
   assert.doesNotMatch(source, /\bsetInterval\s*\(/);
   assert.match(source, /MutationObserver/);
 });
 
-test("extension requests only local storage and the YouTube host", () => {
-  const manifest = JSON.parse(fs.readFileSync(path.join(projectRoot, "manifest.json"), "utf8"));
-  assert.deepEqual(manifest.permissions, ["storage"]);
-  assert.deepEqual(manifest.host_permissions, ["https://www.youtube.com/*"]);
+test("both extensions request only local storage and the YouTube host", () => {
+  for (const platform of platforms) {
+    const manifest = readManifest(platform);
+    assert.deepEqual(manifest.permissions, ["storage"]);
+    assert.deepEqual(manifest.host_permissions, ["https://www.youtube.com/*"]);
+    assert.equal(manifest.content_scripts[0].js[0], "browser-api.js");
+  }
+});
+
+test("Firefox and Chromium runtime files stay in sync", () => {
+  for (const relativePath of sharedRuntimePaths) {
+    const firefoxFile = readPlatformFile("firefox", relativePath, null);
+    const chromiumFile = readPlatformFile("chromium", relativePath, null);
+    assert.deepEqual(chromiumFile, firefoxFile, `${relativePath} differs between platforms`);
+  }
 });
 
 test("runtime ships without production dependencies", () => {
@@ -25,16 +62,19 @@ test("runtime ships without production dependencies", () => {
 });
 
 test("popup and settings reuse the shared logo artwork", () => {
-  for (const file of ["popup.html", "options.html"]) {
-    const source = fs.readFileSync(path.join(projectRoot, file), "utf8");
-    assert.match(source, /<img class="brand-mark[^"]*" src="icons\/icon\.svg" alt="">/);
-    assert.doesNotMatch(source, /brand-mark__(?:play|track)/);
+  for (const platform of platforms) {
+    for (const file of ["popup.html", "options.html"]) {
+      const source = readPlatformFile(platform, file);
+      assert.match(source, /<img class="brand-mark[^"]*" src="icons\/icon\.svg" alt="">/);
+      assert.match(source, /<script src="browser-api\.js" defer><\/script>/);
+      assert.doesNotMatch(source, /brand-mark__(?:play|track)/);
+    }
   }
 });
 
 test("runtime visual palette remains monochrome", () => {
   for (const file of ["ui.css", "content.css", "icons/icon.svg"]) {
-    const source = fs.readFileSync(path.join(projectRoot, file), "utf8");
+    const source = readPlatformFile("firefox", file);
     const colors = source.match(/#[0-9a-f]{6}/gi) || [];
 
     for (const color of colors) {

@@ -9,6 +9,7 @@
     normalizeSettings,
     parseVideoContext,
   } = globalThis.YTResume;
+  const { addMessageListener, sendRuntimeMessage } = globalThis.YTResumeBrowser;
 
   const SAVE_INTERVAL_MS = 5000;
   const INITIAL_PLAYER_CHECK_INTERVAL_MS = 100;
@@ -44,7 +45,7 @@
   }
 
   function sendMessage(type, payload = {}) {
-    return browser.runtime.sendMessage({ type, ...payload });
+    return sendRuntimeMessage({ type, ...payload });
   }
 
   function delay(milliseconds) {
@@ -625,7 +626,7 @@
     return getPageState();
   }
 
-  browser.runtime.onMessage.addListener((message) => {
+  addMessageListener((message) => {
     if (!message || typeof message.type !== "string") {
       return undefined;
     }

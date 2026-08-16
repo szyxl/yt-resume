@@ -1,12 +1,17 @@
 {
-  "name": "yt-resume-firefox",
-  "version": "0.1.0",
+  "name": "yt-resume",
+  "version": "0.2.0",
   "private": true,
-  "description": "A local-first Firefox extension that resumes standard YouTube videos.",
+  "description": "A local-first Firefox and Chromium extension that resumes standard YouTube videos.",
   "scripts": {
     "test": "node --test",
-    "lint": "npx --yes web-ext@10.6.0 lint --source-dir . --ignore-files package.json package-lock.json tests tests/** README.md PRODUCT.md DESIGN.md .impeccable/** web-ext-artifacts/**",
-    "start": "npx --yes web-ext@10.6.0 run --source-dir . --target firefox-desktop --ignore-files package.json package-lock.json tests tests/** README.md PRODUCT.md DESIGN.md .impeccable/** web-ext-artifacts/**",
-    "build": "npx --yes web-ext@10.6.0 build --source-dir . --artifacts-dir web-ext-artifacts --overwrite-dest --ignore-files package.json package-lock.json tests tests/** README.md PRODUCT.md DESIGN.md .impeccable/** web-ext-artifacts/**"
+    "lint": "npm run lint:firefox",
+    "lint:firefox": "npx --yes web-ext@10.6.0 lint --source-dir firefox",
+    "start": "npm run start:firefox",
+    "start:firefox": "npx --yes web-ext@10.6.0 run --source-dir firefox --target firefox-desktop",
+    "start:chromium": "npx --yes web-ext@10.6.0 run --source-dir chromium --target chromium",
+    "build": "npm run build:firefox && npm run build:chromium",
+    "build:firefox": "npx --yes web-ext@10.6.0 build --source-dir firefox --artifacts-dir web-ext-artifacts/firefox --overwrite-dest",
+    "build:chromium": "npx --yes web-ext@10.6.0 build --source-dir chromium --artifacts-dir web-ext-artifacts/chromium --overwrite-dest"
   }
 }

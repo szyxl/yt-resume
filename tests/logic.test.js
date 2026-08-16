@@ -12,7 +12,7 @@ const {
   parseVideoContext,
   progressKey,
   shouldAcceptWrite,
-} = require("../logic.js");
+} = require("../firefox/logic.js");
 
 test("parses standard YouTube watch URLs by video ID", () => {
   assert.deepEqual(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL123"), {

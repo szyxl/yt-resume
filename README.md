@@ -1,6 +1,6 @@
 # YT Resume
 
-A Firefox extension that privately saves and restores playback positions for standard YouTube videos. Progress remains in the current Firefox profile—there is no account, server, analytics, or remote code.
+A Firefox and Chromium extension that privately saves and restores playback positions for standard YouTube videos. Progress remains in the current browser profile—there is no account, server, analytics, or remote code.
 
 ## Behavior
 
@@ -10,7 +10,7 @@ A Firefox extension that privately saves and restores playback positions for sta
 - Ignores positions below five seconds and clears completed or nearly completed videos.
 - Supports 30, 90, 180, 365-day, or unlimited retention; the default is 90 days.
 - Supports regular `youtube.com/watch` videos, including playlist links.
-- Does not run in Private Browsing and currently excludes Shorts, live streams, premieres, embeds, and YouTube Music.
+- Does not run in Private Browsing or Incognito and currently excludes Shorts, live streams, premieres, embeds, and YouTube Music.
 
 ## Resource use
 
@@ -20,16 +20,31 @@ The extension has no runtime dependencies, network requests, analytics, or backg
 
 ## Develop
 
-Requires Firefox 140+ and Node.js.
+Requires Firefox 140+ or Chromium 99+, plus Node.js.
 
 ```bash
 npm install
 npm test
 npm run lint
-npm start
+npm run start:firefox
+npm run start:chromium
 ```
 
-`npm start` launches a temporary Firefox profile with the extension installed. To load it manually, open `about:debugging`, choose **This Firefox**, select **Load Temporary Add-on**, and choose `manifest.json`.
+`npm start` is an alias for `npm run start:firefox`.
+
+To load the extension manually:
+
+- **Firefox:** open `about:debugging`, choose **This Firefox**, select **Load Temporary Add-on**, and choose `firefox/manifest.json`.
+- **Chromium:** open `chrome://extensions`, enable **Developer mode**, select **Load unpacked**, and choose the `chromium/` directory.
+
+## Browser directories
+
+Following uBO Lite's repository layout, each browser has a complete, directly loadable extension directory:
+
+- `firefox/` uses `background.scripts` and contains Firefox's `browser_specific_settings`.
+- `chromium/` uses `background.service_worker` and contains no Firefox-only manifest keys.
+
+The shared runtime files are duplicated between the directories and checked for byte-for-byte equality by the test suite.
 
 ## Build
 
@@ -37,7 +52,7 @@ npm start
 npm run build
 ```
 
-The signed-ready ZIP is written to `web-ext-artifacts/`. Publishing through Mozilla Add-ons is still required for normal permanent installation.
+Browser-specific ZIPs are written to `web-ext-artifacts/firefox/` and `web-ext-artifacts/chromium/`. Publishing through Mozilla Add-ons or a Chromium extension store is still required for normal permanent installation.
 
 ## Stored data
 

@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "minimum_chrome_version": "99.0",
+  "name": "YT Resume",
+  "version": "0.2.0",
+  "description": "Privately saves and restores YouTube playback positions in this browser profile.",
+  "icons": {
+    "16": "icons/icon-flat-16.png",
+    "32": "icons/icon-flat-32.png",
+    "48": "icons/icon-flat-48.png",
+    "96": "icons/icon-flat-96.png"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.youtube.com/*"
+  ],
+  "background": {
+    "service_worker": "background-worker.js"
+  },
+  "action": {
+    "default_title": "YT Resume",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-flat-16.png",
+      "32": "icons/icon-flat-32.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "browser-api.js",
+        "logic.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "incognito": "not_allowed"
+}

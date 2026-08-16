@@ -12,7 +12,7 @@ function clone(value) {
   return value === undefined ? undefined : structuredClone(value);
 }
 
-globalThis.YTResume = require("../logic.js");
+globalThis.YTResume = require("../firefox/logic.js");
 globalThis.browser = {
   runtime: {
     onMessage: {
@@ -65,7 +65,8 @@ globalThis.browser = {
   },
 };
 
-require("../background.js");
+require("../firefox/browser-api.js");
+require("../firefox/background.js");
 
 function dispatch(type, payload = {}) {
   return messageListener({ type, ...payload });

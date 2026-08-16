@@ -2,6 +2,7 @@
   "use strict";
 
   const { DEFAULT_SETTINGS, normalizeSettings } = globalThis.YTResume;
+  const { sendRuntimeMessage } = globalThis.YTResumeBrowser;
 
   const elements = {
     clearCancel: document.querySelector("#clear-cancel"),
@@ -41,8 +42,8 @@
   async function load() {
     try {
       const [settings, stats] = await Promise.all([
-        browser.runtime.sendMessage({ type: "settings:get" }),
-        browser.runtime.sendMessage({ type: "progress:stats" }),
+        sendRuntimeMessage({ type: "settings:get" }),
+        sendRuntimeMessage({ type: "progress:stats" }),
       ]);
       renderSettings(normalizeSettings(settings));
       renderCount(Number(stats.count) || 0);
@@ -60,7 +61,7 @@
     announce("");
 
     try {
-      const settings = await browser.runtime.sendMessage({
+      const settings = await sendRuntimeMessage({
         type: "settings:update",
         patch: { enabled },
       });
@@ -81,13 +82,13 @@
     announce("");
 
     try {
-      const settings = normalizeSettings(await browser.runtime.sendMessage({
+      const settings = normalizeSettings(await sendRuntimeMessage({
         type: "settings:update",
         patch: { retentionDays },
       }));
       elements.retention.value = String(settings.retentionDays);
       elements.retention.dataset.savedValue = elements.retention.value;
-      const stats = await browser.runtime.sendMessage({ type: "progress:stats" });
+      const stats = await sendRuntimeMessage({ type: "progress:stats" });
       renderCount(Number(stats.count) || 0);
       announce(settings.retentionDays === 0
         ? "Positions will not expire."
@@ -123,7 +124,7 @@
     announce("");
 
     try {
-      await browser.runtime.sendMessage({ type: "data:clear" });
+      await sendRuntimeMessage({ type: "data:clear" });
       renderSettings(DEFAULT_SETTINGS);
       elements.retention.dataset.savedValue = String(DEFAULT_SETTINGS.retentionDays);
       renderCount(0);
