@@ -108,30 +108,7 @@
     return Boolean(context && context.videoId === expectedVideoId);
   }
 
-  function isYouTubeBrowseSource(value) {
-    let url;
-
-    try {
-      url = new URL(value);
-    } catch {
-      return false;
-    }
-
-    if (url.protocol !== "https:" || url.hostname !== "www.youtube.com") {
-      return false;
-    }
-
-    return url.pathname === "/"
-      || url.pathname === "/results"
-      || url.pathname === "/playlist"
-      || url.pathname.startsWith("/feed/")
-      || url.pathname.startsWith("/@")
-      || url.pathname.startsWith("/channel/")
-      || url.pathname.startsWith("/c/")
-      || url.pathname.startsWith("/user/");
-  }
-
-  function shouldRestoreCheckpoint(context, navigationSourceUrl = "", checkpointPosition) {
+  function shouldRestoreCheckpoint(context, checkpointPosition) {
     if (!context) {
       return false;
     }
@@ -140,13 +117,17 @@
       return true;
     }
 
-    if (!isYouTubeBrowseSource(navigationSourceUrl)) {
+    const localPosition = Number(checkpointPosition);
+    if (!Number.isFinite(localPosition)) {
       return false;
     }
 
+    if (context.timestampSeconds === null) {
+      return true;
+    }
+
     const timestampSeconds = Number(context.timestampSeconds);
-    const localPosition = Number(checkpointPosition);
-    if (!Number.isFinite(timestampSeconds) || !Number.isFinite(localPosition)) {
+    if (!Number.isFinite(timestampSeconds)) {
       return true;
     }
 

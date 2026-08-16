@@ -37,17 +37,23 @@ test("detects and parses explicit timestamp variants", () => {
   assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=invalid").timestampSeconds, null);
 });
 
-test("YouTube browse resume links use the local checkpoint unless the URL is over a minute ahead", () => {
+test("a direct timestamp older than local progress does not rewind playback", () => {
+  const timestampContext = parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=60s");
+
+  assert.equal(shouldRestoreCheckpoint(timestampContext, 120), true);
+});
+
+test("timestamp links use the local checkpoint unless the URL is over a minute ahead", () => {
   const plainContext = parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
   const timestampContext = parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=157s");
+  const invalidTimestampContext = parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=invalid");
 
-  assert.equal(shouldRestoreCheckpoint(plainContext, "", 80), true);
-  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/", 80), false);
-  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/", 97), true);
-  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/feed/history", 431), true);
-  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/watch?v=aqz-KE-bpKQ", 80), false);
-  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://example.com/", 80), false);
-  assert.equal(shouldRestoreCheckpoint(timestampContext, "", 80), false);
+  assert.equal(shouldRestoreCheckpoint(plainContext, 80), true);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, 80), false);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, 97), true);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, 120), true);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, 431), true);
+  assert.equal(shouldRestoreCheckpoint(invalidTimestampContext, 80), true);
 });
 
 test("rejects Shorts, Music, malformed IDs, and non-YouTube URLs", () => {
