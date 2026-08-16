@@ -10,6 +10,8 @@
   "use strict";
 
   const MINIMUM_POSITION_SECONDS = 5;
+  const MAX_PENDING_MESSAGE_OPERATIONS = 32;
+  const MAX_PROGRESS_RECORDS = 1000;
   const DEFAULT_SETTINGS = Object.freeze({
     enabled: true,
     retentionDays: 90,
@@ -62,6 +64,11 @@
     };
   }
 
+  function matchesVideoContext(value, expectedVideoId) {
+    const context = parseVideoContext(value);
+    return Boolean(context && context.videoId === expectedVideoId);
+  }
+
   function formatTime(value) {
     const seconds = Number.isFinite(Number(value)) ? Math.max(0, Math.floor(Number(value))) : 0;
     const hours = Math.floor(seconds / 3600);
@@ -82,6 +89,16 @@
 
     const completionWindow = Math.min(duration * 0.05, 20);
     return position >= duration - completionWindow;
+  }
+
+  function isVerifiedCompletion(event, video) {
+    return Boolean(
+      event
+      && event.isTrusted === true
+      && video
+      && video.ended === true
+      && isNearCompletion(Number(video.currentTime), Number(video.duration))
+    );
   }
 
   function isRestorable(position, duration) {
@@ -134,19 +151,81 @@
     return typeof key === "string" && key.startsWith(PROGRESS_KEY_PREFIX);
   }
 
+  function createLatestTaskQueue(run) {
+    if (typeof run !== "function") {
+      throw new TypeError("A task function is required");
+    }
+
+    let hasPendingValue = false;
+    let inFlight = null;
+    let pendingValue;
+
+    async function drain() {
+      let result = null;
+      try {
+        while (hasPendingValue) {
+          const value = pendingValue;
+          hasPendingValue = false;
+          result = await run(value);
+        }
+        return result;
+      } finally {
+        inFlight = null;
+      }
+    }
+
+    return Object.freeze({
+      enqueue(value) {
+        pendingValue = value;
+        hasPendingValue = true;
+        if (!inFlight) {
+          inFlight = drain();
+        }
+        return inFlight;
+      },
+      isIdle() {
+        return !inFlight && !hasPendingValue;
+      },
+    });
+  }
+
+  function selectProgressKeysForEviction(stored, incomingKey, maxRecords = MAX_PROGRESS_RECORDS) {
+    const source = stored && typeof stored === "object" ? stored : {};
+    const limit = Number.isInteger(maxRecords) && maxRecords > 0 ? maxRecords : MAX_PROGRESS_RECORDS;
+    const entries = Object.entries(source).filter(([key]) => isProgressKey(key));
+    const incomingAlreadyExists = Object.prototype.hasOwnProperty.call(source, incomingKey);
+    const targetSize = incomingAlreadyExists ? limit : limit - 1;
+    const removeCount = Math.max(0, entries.length - targetSize);
+
+    return entries
+      .sort(([firstKey, first], [secondKey, second]) => {
+        const firstUpdatedAt = Number(first?.updatedAt) || 0;
+        const secondUpdatedAt = Number(second?.updatedAt) || 0;
+        return firstUpdatedAt - secondUpdatedAt || firstKey.localeCompare(secondKey);
+      })
+      .slice(0, removeCount)
+      .map(([key]) => key);
+  }
+
   return {
     DEFAULT_SETTINGS,
+    MAX_PENDING_MESSAGE_OPERATIONS,
+    MAX_PROGRESS_RECORDS,
     MINIMUM_POSITION_SECONDS,
     PROGRESS_KEY_PREFIX,
     RETENTION_OPTIONS,
+    createLatestTaskQueue,
     formatTime,
     isExpired,
     isNearCompletion,
     isProgressKey,
     isRestorable,
+    isVerifiedCompletion,
+    matchesVideoContext,
     normalizeSettings,
     parseVideoContext,
     progressKey,
+    selectProgressKeysForEviction,
     shouldAcceptWrite,
   };
 });

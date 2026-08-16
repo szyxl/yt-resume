@@ -48,11 +48,19 @@ test("pausing marks activity and immediately saves the checkpoint", () => {
   );
 });
 
-test("both extensions request only local storage and the YouTube host", () => {
+test("content script coalesces saves and verifies destructive events", () => {
+  const source = readPlatformFile("firefox", "content.js");
+  assert.match(source, /createLatestTaskQueue/);
+  assert.match(source, /isVerifiedCompletion\(event, video\)/);
+  assert.match(source, /if \(!event\.isTrusted\)/);
+});
+
+test("both extensions request only local storage and required YouTube content access", () => {
   for (const platform of platforms) {
     const manifest = readManifest(platform);
     assert.deepEqual(manifest.permissions, ["storage"]);
-    assert.deepEqual(manifest.host_permissions, ["https://www.youtube.com/*"]);
+    assert.equal(manifest.host_permissions, undefined);
+    assert.deepEqual(manifest.content_scripts[0].matches, ["https://www.youtube.com/*"]);
     assert.equal(manifest.content_scripts[0].js[0], "browser-api.js");
   }
 });
@@ -65,9 +73,19 @@ test("Firefox and Chromium runtime files stay in sync", () => {
   }
 });
 
-test("runtime ships without production dependencies", () => {
+test("runtime ships without production dependencies and locks build tooling", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(projectRoot, "package.json"), "utf8"));
+  const packageLock = JSON.parse(fs.readFileSync(path.join(projectRoot, "package-lock.json"), "utf8"));
+  const lockedWebExt = packageLock.packages["node_modules/web-ext"];
+
   assert.equal(packageJson.dependencies, undefined);
+  assert.equal(packageJson.devDependencies["web-ext"], "10.6.0");
+  assert.equal(lockedWebExt.version, "10.6.0");
+  assert.match(lockedWebExt.integrity, /^sha512-/);
+
+  for (const script of Object.values(packageJson.scripts)) {
+    assert.doesNotMatch(script, /npx\s+--yes/);
+  }
 });
 
 test("popup and settings reuse the shared logo artwork", () => {

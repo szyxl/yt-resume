@@ -2,12 +2,14 @@
 
 const {
   DEFAULT_SETTINGS,
+  MAX_PENDING_MESSAGE_OPERATIONS,
   MINIMUM_POSITION_SECONDS,
   isExpired,
   isNearCompletion,
   isProgressKey,
   normalizeSettings,
   progressKey,
+  selectProgressKeysForEviction,
   shouldAcceptWrite,
 } = YTResume;
 const { addMessageListener } = YTResumeBrowser;
@@ -15,11 +17,23 @@ const { addMessageListener } = YTResumeBrowser;
 const SETTINGS_KEY = "settings";
 const TOMBSTONE_LIFETIME_MS = 24 * 60 * 60 * 1000;
 let operationQueue = Promise.resolve();
+let pendingMessageOperations = 0;
 
 function enqueue(operation) {
   const result = operationQueue.then(operation, operation);
   operationQueue = result.catch(() => undefined);
   return result;
+}
+
+function enqueueMessage(operation) {
+  if (pendingMessageOperations >= MAX_PENDING_MESSAGE_OPERATIONS) {
+    return Promise.reject(new Error("Too many pending extension operations"));
+  }
+
+  pendingMessageOperations += 1;
+  return enqueue(operation).finally(() => {
+    pendingMessageOperations -= 1;
+  });
 }
 
 async function getSettings() {
@@ -62,6 +76,21 @@ async function getProgress(videoId) {
   return record.deleted ? null : record;
 }
 
+async function enforceProgressCapacity(incomingKey = null) {
+  const all = await browser.storage.local.get(null);
+  const existingProgressKey = Object.keys(all).find((key) => isProgressKey(key));
+  const capacityKey = incomingKey || existingProgressKey;
+  if (!capacityKey) {
+    return 0;
+  }
+
+  const keysToRemove = selectProgressKeysForEviction(all, capacityKey);
+  if (keysToRemove.length > 0) {
+    await browser.storage.local.remove(keysToRemove);
+  }
+  return keysToRemove.length;
+}
+
 async function writeTombstone({ videoId, writerId, activityAt, reason }) {
   const key = progressKey(videoId);
   const existing = await getStoredRecord(videoId);
@@ -75,6 +104,9 @@ async function writeTombstone({ videoId, writerId, activityAt, reason }) {
     return { saved: false, reason: "stale", record: existing && !existing.deleted ? existing : null };
   }
 
+  if (!existing) {
+    await enforceProgressCapacity(key);
+  }
   await browser.storage.local.set({
     [key]: {
       ...incoming,
@@ -125,6 +157,9 @@ async function saveProgress(payload) {
     ...incoming,
     updatedAt: Date.now(),
   };
+  if (!existing) {
+    await enforceProgressCapacity(key);
+  }
   await browser.storage.local.set({ [key]: record });
   return { saved: true, record };
 }
@@ -193,7 +228,7 @@ addMessageListener((message) => {
     return undefined;
   }
 
-  return enqueue(() => handleMessage(message));
+  return enqueueMessage(() => handleMessage(message));
 });
 
 browser.runtime.onInstalled.addListener(() => {
@@ -203,9 +238,13 @@ browser.runtime.onInstalled.addListener(() => {
       await browser.storage.local.set({ [SETTINGS_KEY]: { ...DEFAULT_SETTINGS } });
     }
     await cleanupExpiredProgress();
+    await enforceProgressCapacity();
   });
 });
 
 browser.runtime.onStartup.addListener(() => {
-  enqueue(() => cleanupExpiredProgress());
+  enqueue(async () => {
+    await cleanupExpiredProgress();
+    await enforceProgressCapacity();
+  });
 });

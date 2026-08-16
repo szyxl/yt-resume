@@ -7,12 +7,14 @@ const storage = new Map();
 let messageListener;
 let installedListener;
 let startupListener;
+let storageSetGate = null;
 
 function clone(value) {
   return value === undefined ? undefined : structuredClone(value);
 }
 
 globalThis.YTResume = require("../firefox/logic.js");
+const { MAX_PENDING_MESSAGE_OPERATIONS, MAX_PROGRESS_RECORDS, progressKey } = globalThis.YTResume;
 globalThis.browser = {
   runtime: {
     onMessage: {
@@ -48,6 +50,9 @@ globalThis.browser = {
         return result;
       },
       async set(values) {
+        if (storageSetGate) {
+          await storageSetGate;
+        }
         for (const [key, value] of Object.entries(values)) {
           storage.set(key, clone(value));
         }
@@ -185,4 +190,68 @@ test("clear all resets settings and progress", async () => {
   });
   assert.deepEqual(await dispatch("progress:stats"), { count: 0 });
   assert.deepEqual(await dispatch("settings:get"), { enabled: true, retentionDays: 90 });
+});
+
+test("background rejects messages beyond its pending-operation bound", async () => {
+  await dispatch("data:clear");
+  let releaseStorage;
+  storageSetGate = new Promise((resolve) => {
+    releaseStorage = resolve;
+  });
+
+  const pending = Array.from({ length: MAX_PENDING_MESSAGE_OPERATIONS }, (_, index) => dispatch("progress:save", {
+    payload: {
+      videoId: "dQw4w9WgXcQ",
+      writerId: "tab-a",
+      activityAt: 1000 + index,
+      position: 10 + index,
+      duration: 600,
+    },
+  }));
+  const overflow = dispatch("progress:save", {
+    payload: {
+      videoId: "dQw4w9WgXcQ",
+      writerId: "tab-a",
+      activityAt: 2000,
+      position: 200,
+      duration: 600,
+    },
+  });
+
+  await assert.rejects(overflow, /Too many pending extension operations/);
+  releaseStorage();
+  await Promise.all(pending);
+  storageSetGate = null;
+});
+
+test("new progress records evict the oldest entry at the storage cap", async () => {
+  await dispatch("data:clear");
+  storage.set("settings", { enabled: true, retentionDays: 90 });
+  for (let index = 0; index < MAX_PROGRESS_RECORDS; index += 1) {
+    const videoId = String(index).padStart(11, "0");
+    storage.set(progressKey(videoId), {
+      videoId,
+      writerId: "seed",
+      activityAt: index + 1,
+      position: 30,
+      duration: 600,
+      updatedAt: index + 1,
+    });
+  }
+
+  await dispatch("progress:save", {
+    payload: {
+      videoId: "newvideo001",
+      writerId: "tab-a",
+      activityAt: 5000,
+      position: 45,
+      duration: 600,
+    },
+  });
+
+  const progressKeys = [...storage.keys()].filter((key) => key.startsWith("progress:"));
+  assert.equal(progressKeys.length, MAX_PROGRESS_RECORDS);
+  assert.equal(storage.has(progressKey("00000000000")), false);
+  assert.equal(storage.has(progressKey("newvideo001")), true);
+  assert.equal(storage.has("settings"), true);
 });

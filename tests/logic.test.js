@@ -4,13 +4,18 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
   DEFAULT_SETTINGS,
+  MAX_PROGRESS_RECORDS,
+  createLatestTaskQueue,
   formatTime,
   isExpired,
   isNearCompletion,
   isRestorable,
+  isVerifiedCompletion,
+  matchesVideoContext,
   normalizeSettings,
   parseVideoContext,
   progressKey,
+  selectProgressKeysForEviction,
   shouldAcceptWrite,
 } = require("../firefox/logic.js");
 
@@ -87,4 +92,58 @@ test("accepts only the most recent writer activity", () => {
 test("builds namespaced progress keys and rejects invalid IDs", () => {
   assert.equal(progressKey("dQw4w9WgXcQ"), "progress:dQw4w9WgXcQ");
   assert.throws(() => progressKey("invalid"), /Invalid YouTube video ID/);
+});
+
+test("matches only the expected current video context", () => {
+  assert.equal(matchesVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "dQw4w9WgXcQ"), true);
+  assert.equal(matchesVideoContext("https://www.youtube.com/watch?v=aqz-KE-bpKQ", "dQw4w9WgXcQ"), false);
+  assert.equal(matchesVideoContext("https://example.com/watch?v=dQw4w9WgXcQ", "dQw4w9WgXcQ"), false);
+});
+
+test("accepts completion only from a trusted event and genuinely ended video", () => {
+  const completedVideo = { currentTime: 600, duration: 600, ended: true };
+
+  assert.equal(isVerifiedCompletion({ isTrusted: true }, completedVideo), true);
+  assert.equal(isVerifiedCompletion({ isTrusted: false }, completedVideo), false);
+  assert.equal(isVerifiedCompletion({ isTrusted: true }, { ...completedVideo, ended: false }), false);
+  assert.equal(isVerifiedCompletion({ isTrusted: true }, { ...completedVideo, currentTime: 300 }), false);
+});
+
+test("latest-task queue keeps only the newest waiting value", async () => {
+  const releases = [];
+  const started = [];
+  const queue = createLatestTaskQueue(async (value) => {
+    started.push(value);
+    await new Promise((resolve) => releases.push(resolve));
+    return value;
+  });
+
+  const first = queue.enqueue(1);
+  const second = queue.enqueue(2);
+  const third = queue.enqueue(3);
+  assert.deepEqual(started, [1]);
+  assert.equal(queue.isIdle(), false);
+
+  releases.shift()();
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(started, [1, 3]);
+
+  releases.shift()();
+  assert.equal(await first, 3);
+  assert.equal(await second, 3);
+  assert.equal(await third, 3);
+  assert.equal(queue.isIdle(), true);
+});
+
+test("storage eviction keeps the newest bounded set", () => {
+  const incomingKey = progressKey("newvideo001");
+  const stored = {};
+  for (let index = 0; index < MAX_PROGRESS_RECORDS; index += 1) {
+    const videoId = String(index).padStart(11, "0");
+    stored[progressKey(videoId)] = { updatedAt: index + 1 };
+  }
+  stored.settings = { enabled: true, retentionDays: 90 };
+
+  assert.deepEqual(selectProgressKeysForEviction(stored, incomingKey), [progressKey("00000000000")]);
+  assert.deepEqual(selectProgressKeysForEviction(stored, progressKey("00000000500")), []);
 });

@@ -3,9 +3,12 @@
 
   const {
     DEFAULT_SETTINGS,
+    createLatestTaskQueue,
     formatTime,
     isNearCompletion,
     isRestorable,
+    isVerifiedCompletion,
+    matchesVideoContext,
     normalizeSettings,
     parseVideoContext,
   } = globalThis.YTResume;
@@ -88,7 +91,7 @@
   function waitForPlayableVideo(session) {
     return new Promise((resolve) => {
       function check() {
-        if (session.destroyed || currentSession !== session) {
+        if (!isCurrentSessionForLocation(session)) {
           resolve(null);
           return;
         }
@@ -122,8 +125,45 @@
     session.activityAt = Date.now();
   }
 
+  function isCurrentSessionForLocation(session) {
+    return Boolean(
+      session
+      && !session.destroyed
+      && currentSession === session
+      && matchesVideoContext(location.href, session.context.videoId)
+    );
+  }
+
+  async function persistSessionPayload(session, payload) {
+    if (!isCurrentSessionForLocation(session)) {
+      return null;
+    }
+
+    try {
+      const result = await sendMessage("progress:save", { payload });
+      if (result?.saved !== false) {
+        session.lastPersistedPosition = payload.position;
+      }
+      session.isStaleWriter = result?.saved === false && result.reason === "stale";
+      if (session.isStaleWriter) {
+        stopPeriodicSave(session);
+      }
+      if (isCurrentSessionForLocation(session) && result) {
+        publicState.record = result.record || null;
+      }
+      return result;
+    } catch {
+      return null;
+    }
+  }
+
   async function saveSession(session, { force = false } = {}) {
-    if (!session || !session.video || !session.settings.enabled || !session.hasActivity) {
+    if (
+      !isCurrentSessionForLocation(session)
+      || !session.video
+      || !session.settings.enabled
+      || !session.hasActivity
+    ) {
       return null;
     }
 
@@ -133,11 +173,12 @@
       return null;
     }
 
+    const minimumPositionDelta = force ? 0.25 : 1;
     const positionDidNotAdvance = Number.isFinite(session.lastPersistedPosition)
-      && Math.abs(position - session.lastPersistedPosition) < 1;
+      && Math.abs(position - session.lastPersistedPosition) < minimumPositionDelta;
     const samePositionIsPending = Number.isFinite(session.pendingPosition)
-      && Math.abs(position - session.pendingPosition) < 1;
-    if (!force && (positionDidNotAdvance || samePositionIsPending)) {
+      && Math.abs(position - session.pendingPosition) < minimumPositionDelta;
+    if (positionDidNotAdvance || samePositionIsPending) {
       return null;
     }
 
@@ -159,28 +200,22 @@
         : null;
     }
 
-    try {
-      const result = await sendMessage("progress:save", { payload });
-      session.lastPersistedPosition = position;
-      session.isStaleWriter = result?.saved === false && result.reason === "stale";
-      if (session.isStaleWriter) {
-        stopPeriodicSave(session);
-      }
-      if (currentSession === session && result) {
-        publicState.record = result.record || null;
-      }
-      return result;
-    } catch {
-      return null;
-    } finally {
-      if (session.pendingPosition === position) {
-        session.pendingPosition = null;
-      }
+    if (!session.saveQueue) {
+      session.saveQueue = createLatestTaskQueue((nextPayload) => persistSessionPayload(session, nextPayload));
     }
+    const result = await session.saveQueue.enqueue(payload);
+    if (session.saveQueue.isIdle()) {
+      session.pendingPosition = null;
+    }
+    return result;
   }
 
   async function deleteSessionProgress(session, reason = "forgotten") {
-    if (!session) {
+    if (
+      !session
+      || session.destroyed
+      || !matchesVideoContext(location.href, session.context.videoId)
+    ) {
       return null;
     }
 
@@ -257,7 +292,10 @@
       void saveSession(session, { force: true });
     });
 
-    addListener(session, video, "ended", () => {
+    addListener(session, video, "ended", (event) => {
+      if (!isVerifiedCompletion(event, video)) {
+        return;
+      }
       stopPeriodicSave(session);
       markActivity(session);
       void deleteSessionProgress(session, "completed");
@@ -355,8 +393,11 @@
       timer = setTimeout(() => removeToast(), remaining);
     }
 
-    startOverButton.addEventListener("click", () => {
-      if (currentSession !== session || session.destroyed) {
+    startOverButton.addEventListener("click", (event) => {
+      if (!event.isTrusted) {
+        return;
+      }
+      if (!isCurrentSessionForLocation(session)) {
         removeToast();
         return;
       }
@@ -401,7 +442,7 @@
 
   async function restorePosition(session, record) {
     await delay(RESTORE_SETTLE_MS);
-    if (session.destroyed || currentSession !== session || isAdPlaying(session.video)) {
+    if (!isCurrentSessionForLocation(session) || isAdPlaying(session.video)) {
       return;
     }
 
@@ -432,8 +473,7 @@
       if (
         playerMovedElsewhere
         && !userInteracted
-        && !session.destroyed
-        && currentSession === session
+        && isCurrentSessionForLocation(session)
         && !isAdPlaying(session.video)
       ) {
         session.video.currentTime = target;
@@ -445,7 +485,7 @@
       session.restoring = false;
     }
 
-    if (!session.destroyed && currentSession === session && restoredPositionIsCurrent) {
+    if (isCurrentSessionForLocation(session) && restoredPositionIsCurrent) {
       showRestoreToast(session, target);
     }
   }
@@ -525,7 +565,7 @@
       record = null;
     }
 
-    if (session.destroyed || currentSession !== session) {
+    if (!isCurrentSessionForLocation(session)) {
       return;
     }
 
@@ -542,7 +582,7 @@
     }
 
     const video = await waitForPlayableVideo(session);
-    if (!video || session.destroyed || currentSession !== session) {
+    if (!video || !isCurrentSessionForLocation(session)) {
       return;
     }
 
@@ -565,7 +605,7 @@
       }
     }
 
-    if (session.destroyed || currentSession !== session) {
+    if (!isCurrentSessionForLocation(session)) {
       return;
     }
 

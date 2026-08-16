@@ -23,7 +23,7 @@ The extension has no runtime dependencies, network requests, analytics, or backg
 Requires Firefox 140+ or Chromium 99+, plus Node.js.
 
 ```bash
-npm install
+npm ci
 npm test
 npm run lint
 npm run start:firefox
