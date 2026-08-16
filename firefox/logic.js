@@ -69,6 +69,37 @@
     return Boolean(context && context.videoId === expectedVideoId);
   }
 
+  function isYouTubeBrowseSource(value) {
+    let url;
+
+    try {
+      url = new URL(value);
+    } catch {
+      return false;
+    }
+
+    if (url.protocol !== "https:" || url.hostname !== "www.youtube.com") {
+      return false;
+    }
+
+    return url.pathname === "/"
+      || url.pathname === "/results"
+      || url.pathname === "/playlist"
+      || url.pathname.startsWith("/feed/")
+      || url.pathname.startsWith("/@")
+      || url.pathname.startsWith("/channel/")
+      || url.pathname.startsWith("/c/")
+      || url.pathname.startsWith("/user/");
+  }
+
+  function shouldRestoreCheckpoint(context, navigationSourceUrl = "") {
+    if (!context) {
+      return false;
+    }
+
+    return !context.hasExplicitTimestamp || isYouTubeBrowseSource(navigationSourceUrl);
+  }
+
   function formatTime(value) {
     const seconds = Number.isFinite(Number(value)) ? Math.max(0, Math.floor(Number(value))) : 0;
     const hours = Math.floor(seconds / 3600);
@@ -227,5 +258,6 @@
     progressKey,
     selectProgressKeysForEviction,
     shouldAcceptWrite,
+    shouldRestoreCheckpoint,
   };
 });

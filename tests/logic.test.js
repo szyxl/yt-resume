@@ -17,6 +17,7 @@ const {
   progressKey,
   selectProgressKeysForEviction,
   shouldAcceptWrite,
+  shouldRestoreCheckpoint,
 } = require("../firefox/logic.js");
 
 test("parses standard YouTube watch URLs by video ID", () => {
@@ -30,6 +31,18 @@ test("detects explicit timestamp variants", () => {
   assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s").hasExplicitTimestamp, true);
   assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&start=42").hasExplicitTimestamp, true);
   assert.equal(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ#t=42").hasExplicitTimestamp, true);
+});
+
+test("YouTube browse resume links do not override local checkpoints", () => {
+  const plainContext = parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+  const timestampContext = parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=303s");
+
+  assert.equal(shouldRestoreCheckpoint(plainContext, ""), true);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/"), true);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/feed/history"), true);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://www.youtube.com/watch?v=aqz-KE-bpKQ"), false);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, "https://example.com/"), false);
+  assert.equal(shouldRestoreCheckpoint(timestampContext, ""), false);
 });
 
 test("rejects Shorts, Music, malformed IDs, and non-YouTube URLs", () => {

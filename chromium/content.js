@@ -11,6 +11,7 @@
     matchesVideoContext,
     normalizeSettings,
     parseVideoContext,
+    shouldRestoreCheckpoint,
   } = globalThis.YTResume;
   const { addMessageListener, sendRuntimeMessage } = globalThis.YTResumeBrowser;
 
@@ -24,6 +25,7 @@
   let settings = { ...DEFAULT_SETTINGS };
   let navigationTimer = null;
   let lastObservedUrl = location.href;
+  let pendingNavigationSourceUrl = document.referrer;
   let activeToast = null;
   let publicState = createPublicState();
 
@@ -511,6 +513,8 @@
   }
 
   async function startForCurrentUrl(force = false) {
+    const navigationSourceUrl = pendingNavigationSourceUrl;
+    pendingNavigationSourceUrl = "";
     lastObservedUrl = location.href;
     const context = parseVideoContext(location.href);
 
@@ -597,7 +601,7 @@
     publicState.reason = record ? "Checkpoint ready." : "No checkpoint saved yet.";
     publicState.title = getVideoTitle();
 
-    if (record && !context.hasExplicitTimestamp) {
+    if (record && shouldRestoreCheckpoint(context, navigationSourceUrl)) {
       if (isRestorable(record.position, video.duration)) {
         await restorePosition(session, record);
       } else if (isNearCompletion(record.position, video.duration)) {
@@ -714,6 +718,7 @@
 
   function checkForLocationChange() {
     if (location.href !== lastObservedUrl) {
+      pendingNavigationSourceUrl = lastObservedUrl;
       lastObservedUrl = location.href;
       scheduleStart();
     }
@@ -726,7 +731,12 @@
     subtree: true,
   });
 
-  document.addEventListener("yt-navigate-start", () => stopCurrentSession(true));
+  document.addEventListener("yt-navigate-start", () => {
+    if (!pendingNavigationSourceUrl) {
+      pendingNavigationSourceUrl = lastObservedUrl;
+    }
+    stopCurrentSession(true);
+  });
   document.addEventListener("yt-navigate-finish", () => scheduleStart());
   window.addEventListener("hashchange", checkForLocationChange);
   window.addEventListener("popstate", checkForLocationChange);
