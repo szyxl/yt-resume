@@ -29,9 +29,17 @@
     return state.reasonCode === "radio-mix" ? "Not saved" : "Not available";
   }
 
+  function getCounterValue(state) {
+    if (!state.supported) {
+      return "N/A";
+    }
+
+    return state.record ? formatTime(state.record.position) : "–:––";
+  }
+
   function render(state) {
     elements.counterLabel.textContent = getCounterLabel(state);
-    elements.savedTime.textContent = state.record ? formatTime(state.record.position) : "–:––";
+    elements.savedTime.textContent = getCounterValue(state);
     elements.videoTitle.textContent = state.supported
       ? state.title || state.reason || "No checkpoint saved yet."
       : state.reason || "Open a standard YouTube video to begin.";

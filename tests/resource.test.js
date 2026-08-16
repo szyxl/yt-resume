@@ -99,10 +99,11 @@ test("popup and settings reuse the shared logo artwork", () => {
   }
 });
 
-test("popup identifies YouTube Mix and Radio playback as not saved", () => {
+test("popup clearly identifies unavailable and deliberately unsaved playback", () => {
   const source = readPlatformFile("firefox", "popup.js");
 
   assert.match(source, /reasonCode === "radio-mix" \? "Not saved" : "Not available"/);
+  assert.match(source, /if \(!state\.supported\) \{\s*return "N\/A";/);
 });
 
 test("settings offer seven-day checkpoint retention", () => {
