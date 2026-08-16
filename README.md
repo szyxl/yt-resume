@@ -57,3 +57,7 @@ Browser-specific ZIPs are written to `web-ext-artifacts/firefox/` and `web-ext-a
 ## Stored data
 
 Each record contains only a YouTube video ID, playback position, duration, and local timestamps used for conflict resolution and expiry. Video titles are shown transiently in the popup but are not stored.
+
+## License
+
+YT Resume is free and open-source software licensed under the [GNU General Public License v3.0](LICENSE).
