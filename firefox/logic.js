@@ -14,9 +14,9 @@
   const MAX_PROGRESS_RECORDS = 1000;
   const DEFAULT_SETTINGS = Object.freeze({
     enabled: true,
-    retentionDays: 90,
+    retentionDays: 7,
   });
-  const RETENTION_OPTIONS = Object.freeze([30, 90, 180, 365, 0]);
+  const RETENTION_OPTIONS = Object.freeze([7, 30, 90, 180, 365, 0]);
   const PROGRESS_KEY_PREFIX = "progress:";
   const VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/;
 

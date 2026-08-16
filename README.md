@@ -8,7 +8,7 @@ A Firefox and Chromium extension that privately saves and restores playback posi
 - Saves every five seconds and on pause, seek, navigation, and page exit.
 - Lets explicit timestamp links override the saved checkpoint.
 - Ignores positions below five seconds and clears completed or nearly completed videos.
-- Supports 30, 90, 180, 365-day, or unlimited retention; the default is 90 days.
+- Supports 7, 30, 90, 180, 365-day, or unlimited retention; the default is 7 days.
 - Supports regular `youtube.com/watch` videos, including playlist links.
 - Does not run in Private Browsing or Incognito and currently excludes Shorts, live streams, premieres, embeds, and YouTube Music.
 

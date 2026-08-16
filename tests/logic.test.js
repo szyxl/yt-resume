@@ -86,6 +86,8 @@ test("expires records using the configured retention period", () => {
 });
 
 test("normalizes settings to supported values", () => {
+  assert.deepEqual(DEFAULT_SETTINGS, { enabled: true, retentionDays: 7 });
+  assert.deepEqual(normalizeSettings({ enabled: true, retentionDays: 7 }), DEFAULT_SETTINGS);
   assert.deepEqual(normalizeSettings({ enabled: false, retentionDays: 365 }), {
     enabled: false,
     retentionDays: 365,

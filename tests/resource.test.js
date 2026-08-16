@@ -99,6 +99,13 @@ test("popup and settings reuse the shared logo artwork", () => {
   }
 });
 
+test("settings offer seven-day checkpoint retention", () => {
+  for (const platform of platforms) {
+    const source = readPlatformFile(platform, "options.html");
+    assert.match(source, /<option value="7">7 days<\/option>/);
+  }
+});
+
 test("runtime visual palette remains monochrome", () => {
   for (const file of ["ui.css", "content.css", "icons/icon.svg"]) {
     const source = readPlatformFile("firefox", file);
