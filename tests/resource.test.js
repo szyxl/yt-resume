@@ -8,6 +8,7 @@ const path = require("node:path");
 const projectRoot = path.resolve(__dirname, "..");
 const platforms = ["firefox", "chromium"];
 const sharedRuntimePaths = [
+  "LICENSE",
   "background.js",
   "browser-api.js",
   "content.css",

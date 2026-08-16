@@ -28,5 +28,5 @@ test("Firefox manifest uses only Manifest V3 background scripts", () => {
     scripts: ["browser-api.js", "logic.js", "background.js"],
   });
   assert.equal(manifest.background.service_worker, undefined);
-  assert.ok(manifest.browser_specific_settings.gecko.id);
+  assert.equal(manifest.browser_specific_settings.gecko.id, "yt-resume@szyxl.github.io");
 });
