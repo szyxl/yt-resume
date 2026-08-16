@@ -44,8 +44,7 @@ To load the extension manually:
 npm run build
 ```
 
-Browser-specific ZIPs are written to `web-ext-artifacts/firefox/` and `web-ext-artifacts/chromium/`. Publishing through Mozilla Add-ons or a Chromium extension store is still required for normal permanent installation.
-
+Browser-specific ZIPs are written to `web-ext-artifacts/firefox/` and `web-ext-artifacts/chromium/`. 
 ## Stored data
 
 Each record contains only a YouTube video ID, playback position, duration, and local timestamps used for conflict resolution and expiry. Video titles are shown transiently in the popup but are not stored.
