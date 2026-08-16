@@ -1,0 +1,58 @@
+<!--
+THESIS: Make local playback memory feel tangible; refuse the generic extension settings-card stack.
+OWN-WORLD: A matte graphite video deck, inset black counter, fixed-width time digits, and one amber memory lamp.
+STORY: See whether resume is active, verify this video's checkpoint, forget it, or open Settings.
+FIRST VIEWPORT: A narrow chassis header leads directly into one oversized time counter; the video action and enablement rail follow beneath.
+FORM: The Memory Counter, fourth grounded direction, staged as one instrument whose state changes around a fixed time display; seed yt-resume-2026.
+-->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YT Resume</title>
+    <link rel="stylesheet" href="ui.css">
+    <script src="logic.js" defer></script>
+    <script src="popup.js" defer></script>
+  </head>
+  <body class="popup-page">
+    <main class="deck deck--popup" aria-labelledby="popup-title">
+      <header class="deck-header">
+        <div class="brand-mark" aria-hidden="true">
+          <span class="brand-mark__play"></span>
+          <span class="brand-mark__track"></span>
+        </div>
+        <h1 id="popup-title">YT Resume</h1>
+        <span class="state-badge" id="state-badge">On</span>
+      </header>
+
+      <section class="counter" aria-labelledby="counter-label">
+        <div class="counter__rail">
+          <span class="machine-label" id="counter-label">Local checkpoint</span>
+          <span class="memory-state" id="memory-state">
+            <span class="memory-state__lamp" aria-hidden="true"></span>
+            <span id="memory-state-label">Checking</span>
+          </span>
+        </div>
+        <output class="counter__time" id="saved-time" aria-live="polite">–:––</output>
+        <p class="counter__title" id="video-title">Reading this tab…</p>
+      </section>
+
+      <div class="popup-action-zone">
+        <button class="button button--memory" id="forget-button" type="button" disabled>
+          Forget this video
+        </button>
+        <p class="inline-feedback" id="popup-feedback" role="status" aria-live="polite"></p>
+      </div>
+
+      <footer class="control-rail">
+        <label class="switch-control" for="enabled-toggle">
+          <input class="switch-control__input" id="enabled-toggle" type="checkbox">
+          <span class="switch-control__track" aria-hidden="true"></span>
+          <span>Resume videos</span>
+        </label>
+        <button class="text-action" id="settings-button" type="button">Settings</button>
+      </footer>
+    </main>
+  </body>
+</html>

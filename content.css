@@ -1,0 +1,123 @@
+.yt-resume-toast {
+  --yt-resume-amber: #ffb84d;
+  --yt-resume-bg: #171a1f;
+  --yt-resume-border: #4a535e;
+  --yt-resume-muted: #c0c6cc;
+  --yt-resume-text: #f5f7f8;
+
+  position: absolute;
+  z-index: 70;
+  left: 16px;
+  bottom: 64px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(520px, calc(100% - 32px));
+  min-height: 44px;
+  padding: 7px 8px 7px 14px;
+  color: var(--yt-resume-text);
+  background: var(--yt-resume-bg);
+  border: 1px solid var(--yt-resume-border);
+  border-radius: 7px;
+  box-shadow:
+    0 8px 22px rgb(0 0 0 / 35%),
+    inset 0 1px 0 rgb(255 255 255 / 6%);
+  font: 500 14px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  pointer-events: auto;
+}
+
+.yt-resume-toast__message {
+  min-width: 0;
+  margin-inline-end: 4px;
+  overflow-wrap: anywhere;
+}
+
+.yt-resume-toast__action,
+.yt-resume-toast__dismiss {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 5px 9px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.yt-resume-toast__action {
+  color: var(--yt-resume-amber);
+  border-color: color-mix(in srgb, var(--yt-resume-amber) 55%, transparent);
+}
+
+.yt-resume-toast__dismiss {
+  color: var(--yt-resume-muted);
+}
+
+.yt-resume-toast__action:hover,
+.yt-resume-toast__dismiss:hover {
+  background: rgb(255 255 255 / 8%);
+}
+
+.yt-resume-toast__action:focus-visible,
+.yt-resume-toast__dismiss:focus-visible {
+  outline: 2px solid var(--yt-resume-amber);
+  outline-offset: 2px;
+}
+
+.yt-resume-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .yt-resume-toast {
+    animation: yt-resume-toast-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .yt-resume-toast--leaving {
+    animation: yt-resume-toast-out 140ms ease-in forwards;
+  }
+}
+
+@keyframes yt-resume-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes yt-resume-toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (max-width: 520px) {
+  .yt-resume-toast {
+    right: 10px;
+    bottom: 54px;
+    left: 10px;
+    flex-wrap: wrap;
+  }
+
+  .yt-resume-toast__message {
+    flex: 1 1 100%;
+  }
+}
+
+@media (forced-colors: active) {
+  .yt-resume-toast,
+  .yt-resume-toast__action,
+  .yt-resume-toast__dismiss {
+    border-color: ButtonText;
+  }
+}

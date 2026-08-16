@@ -1,0 +1,12 @@
+{
+  "name": "yt-resume-firefox",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A local-first Firefox extension that resumes standard YouTube videos.",
+  "scripts": {
+    "test": "node --test",
+    "lint": "npx --yes web-ext@10.6.0 lint --source-dir . --ignore-files package.json package-lock.json tests tests/** README.md PRODUCT.md DESIGN.md .impeccable/** web-ext-artifacts/**",
+    "start": "npx --yes web-ext@10.6.0 run --source-dir . --target firefox-desktop --ignore-files package.json package-lock.json tests tests/** README.md PRODUCT.md DESIGN.md .impeccable/** web-ext-artifacts/**",
+    "build": "npx --yes web-ext@10.6.0 build --source-dir . --artifacts-dir web-ext-artifacts --overwrite-dest --ignore-files package.json package-lock.json tests tests/** README.md PRODUCT.md DESIGN.md .impeccable/** web-ext-artifacts/**"
+  }
+}
