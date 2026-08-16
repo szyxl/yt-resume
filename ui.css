@@ -1,23 +1,24 @@
 :root {
   color-scheme: dark;
-  --color-display: #090b0e;
-  --color-deck: #171a1f;
-  --color-chassis: #1d2228;
-  --color-control: #272d35;
-  --color-seam: #424b56;
-  --color-seam-strong: #5f6a76;
-  --color-text: #f5f7f8;
-  --color-muted: #b8c0c8;
-  --color-dim: #8f99a4;
-  --color-memory: #f5c451;
-  --color-memory-soft: #ffe0a3;
-  --color-danger: #ff9a90;
-  --color-danger-surface: #3a2223;
+  --color-display: #090909;
+  --color-deck: #171717;
+  --color-chassis: #1d1d1d;
+  --color-control: #292929;
+  --color-seam: #464646;
+  --color-seam-strong: #666666;
+  --color-text: #f5f5f5;
+  --color-muted: #bdbdbd;
+  --color-dim: #919191;
+  --color-memory: #f5f5f5;
+  --color-memory-soft: #ffffff;
+  --color-on-memory: #090909;
+  --color-danger: #f5f5f5;
+  --color-danger-surface: #202020;
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-counter: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --radius-control: 5px;
   --radius-display: 7px;
-  --focus-ring: #ffe0a3;
+  --focus-ring: #ffffff;
 }
 
 * {
@@ -112,46 +113,16 @@ button:disabled {
 }
 
 .brand-mark {
-  position: relative;
+  display: block;
   flex: 0 0 auto;
   width: 34px;
   height: 30px;
-  overflow: hidden;
-  background: var(--color-display);
-  border: 1px solid var(--color-seam);
-  border-radius: var(--radius-control);
-  box-shadow: inset 0 1px 5px rgb(0 0 0 / 55%);
-}
-
-.brand-mark__play {
-  position: absolute;
-  top: 6px;
-  left: 12px;
-  width: 9px;
-  height: 12px;
-  background: var(--color-memory);
-  clip-path: polygon(0 0, 100% 50%, 0 100%);
-}
-
-.brand-mark__track {
-  position: absolute;
-  right: 5px;
-  bottom: 4px;
-  left: 5px;
-  height: 2px;
-  background: linear-gradient(to right, var(--color-memory) 62%, var(--color-seam) 62%);
+  object-fit: contain;
 }
 
 .brand-mark--large {
   width: 48px;
   height: 42px;
-}
-
-.brand-mark--large .brand-mark__play {
-  top: 9px;
-  left: 18px;
-  width: 12px;
-  height: 16px;
 }
 
 .state-badge,
@@ -172,7 +143,7 @@ button:disabled {
 }
 
 .state-badge[data-state="on"] {
-  color: var(--color-display);
+  color: var(--color-on-memory);
   background: var(--color-memory);
   border-color: var(--color-memory-soft);
 }
@@ -234,7 +205,6 @@ button:disabled {
 .memory-state[data-state="saved"] .memory-state__lamp {
   background: var(--color-memory);
   border-color: var(--color-memory-soft);
-  box-shadow: 0 0 8px rgb(255 184 77 / 45%);
 }
 
 .counter__time {
@@ -285,7 +255,7 @@ button:disabled {
 
 .button--memory:not(:disabled):hover,
 .button--memory:not(:disabled):active {
-  color: var(--color-display);
+  color: var(--color-on-memory);
   background: var(--color-memory);
   border-color: var(--color-memory-soft);
 }
@@ -370,7 +340,7 @@ button:disabled {
 
 .switch-control__input:checked + .switch-control__track::after {
   left: 22px;
-  background: var(--color-memory);
+  background: var(--color-memory-soft);
 }
 
 .switch-control__input:disabled + .switch-control__track {
@@ -407,11 +377,6 @@ button:disabled {
   align-items: flex-start;
   gap: 16px;
   padding-bottom: 26px;
-}
-
-.settings-header .machine-label {
-  margin: 2px 0 8px;
-  color: var(--color-memory-soft);
 }
 
 .settings-header h1 {
@@ -568,13 +533,6 @@ button:disabled {
   .brand-mark--large {
     width: 40px;
     height: 36px;
-  }
-
-  .brand-mark--large .brand-mark__play {
-    top: 8px;
-    left: 15px;
-    width: 10px;
-    height: 14px;
   }
 
   .setting-row,

@@ -1,86 +1,86 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-15T23:28:34+05:45",
+  "generatedAt": "2026-08-16T09:16:09+05:45",
   "title": "Design System: YT Resume",
   "extensions": {
     "colorMeta": {
       "display-black": {
         "role": "neutral",
         "displayName": "Display Black",
-        "canonical": "#090b0e",
-        "tonalRamp": ["#090b0e", "#171a1f", "#272d35", "#424b56", "#5f6a76", "#8f99a4", "#b8c0c8", "#f5f7f8"]
+        "canonical": "#090909",
+        "tonalRamp": ["#090909", "#171717", "#292929", "#464646", "#666666", "#919191", "#bdbdbd", "#f5f5f5"]
       },
-      "deck-graphite": {
+      "deck-black": {
         "role": "neutral",
-        "displayName": "Deck Graphite",
-        "canonical": "#171a1f",
-        "tonalRamp": ["#090b0e", "#171a1f", "#272d35", "#424b56", "#5f6a76", "#8f99a4", "#b8c0c8", "#f5f7f8"]
+        "displayName": "Deck Black",
+        "canonical": "#171717",
+        "tonalRamp": ["#090909", "#171717", "#292929", "#464646", "#666666", "#919191", "#bdbdbd", "#f5f5f5"]
       },
-      "chassis-graphite": {
+      "chassis-black": {
         "role": "neutral",
-        "displayName": "Chassis Graphite",
-        "canonical": "#1d2228",
-        "tonalRamp": ["#090b0e", "#171a1f", "#272d35", "#424b56", "#5f6a76", "#8f99a4", "#b8c0c8", "#f5f7f8"]
+        "displayName": "Chassis Black",
+        "canonical": "#1d1d1d",
+        "tonalRamp": ["#090909", "#171717", "#292929", "#464646", "#666666", "#919191", "#bdbdbd", "#f5f5f5"]
       },
       "control-grey": {
         "role": "neutral",
         "displayName": "Control Grey",
-        "canonical": "#272d35",
-        "tonalRamp": ["#090b0e", "#171a1f", "#272d35", "#424b56", "#5f6a76", "#8f99a4", "#b8c0c8", "#f5f7f8"]
+        "canonical": "#292929",
+        "tonalRamp": ["#090909", "#171717", "#292929", "#464646", "#666666", "#919191", "#bdbdbd", "#f5f5f5"]
       },
       "seam-grey": {
         "role": "neutral",
         "displayName": "Seam Grey",
-        "canonical": "#424b56",
-        "tonalRamp": ["#090b0e", "#171a1f", "#272d35", "#424b56", "#5f6a76", "#8f99a4", "#b8c0c8", "#f5f7f8"]
+        "canonical": "#464646",
+        "tonalRamp": ["#090909", "#171717", "#292929", "#464646", "#666666", "#919191", "#bdbdbd", "#f5f5f5"]
       },
       "seam-strong": {
         "role": "neutral",
         "displayName": "Strong Seam",
-        "canonical": "#5f6a76",
-        "tonalRamp": ["#090b0e", "#171a1f", "#272d35", "#424b56", "#5f6a76", "#8f99a4", "#b8c0c8", "#f5f7f8"]
+        "canonical": "#666666",
+        "tonalRamp": ["#090909", "#171717", "#292929", "#464646", "#666666", "#919191", "#bdbdbd", "#f5f5f5"]
       },
       "counter-white": {
         "role": "neutral",
         "displayName": "Counter White",
-        "canonical": "#f5f7f8",
-        "tonalRamp": ["#090b0e", "#171a1f", "#272d35", "#424b56", "#5f6a76", "#8f99a4", "#b8c0c8", "#f5f7f8"]
+        "canonical": "#f5f5f5",
+        "tonalRamp": ["#090909", "#171717", "#292929", "#464646", "#666666", "#919191", "#bdbdbd", "#f5f5f5"]
       },
       "label-grey": {
         "role": "neutral",
         "displayName": "Label Grey",
-        "canonical": "#b8c0c8",
-        "tonalRamp": ["#090b0e", "#171a1f", "#272d35", "#424b56", "#5f6a76", "#8f99a4", "#b8c0c8", "#f5f7f8"]
+        "canonical": "#bdbdbd",
+        "tonalRamp": ["#090909", "#171717", "#292929", "#464646", "#666666", "#919191", "#bdbdbd", "#f5f5f5"]
       },
       "dim-grey": {
         "role": "neutral",
         "displayName": "Dim Grey",
-        "canonical": "#8f99a4",
-        "tonalRamp": ["#090b0e", "#171a1f", "#272d35", "#424b56", "#5f6a76", "#8f99a4", "#b8c0c8", "#f5f7f8"]
+        "canonical": "#919191",
+        "tonalRamp": ["#090909", "#171717", "#292929", "#464646", "#666666", "#919191", "#bdbdbd", "#f5f5f5"]
       },
-      "memory-gold": {
+      "signal-white": {
         "role": "primary",
-        "displayName": "Memory Gold",
-        "canonical": "#f5c451",
-        "tonalRamp": ["#2a2105", "#50400c", "#786217", "#a18426", "#caa637", "#f5c451", "#ffe0a3", "#fff4da"]
+        "displayName": "Signal White",
+        "canonical": "#f5f5f5",
+        "tonalRamp": ["#090909", "#171717", "#292929", "#464646", "#666666", "#919191", "#bdbdbd", "#f5f5f5"]
       },
-      "memory-gold-soft": {
+      "signal-white-bright": {
         "role": "primary",
-        "displayName": "Soft Memory Gold",
-        "canonical": "#ffe0a3",
-        "tonalRamp": ["#2a2105", "#50400c", "#786217", "#a18426", "#caa637", "#f5c451", "#ffe0a3", "#fff4da"]
+        "displayName": "Bright Signal White",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#090909", "#171717", "#292929", "#464646", "#666666", "#919191", "#bdbdbd", "#ffffff"]
       },
-      "danger-coral": {
+      "danger-white": {
         "role": "secondary",
-        "displayName": "Danger Coral",
-        "canonical": "#ff9a90",
-        "tonalRamp": ["#2b1012", "#4b1d20", "#713034", "#9b474b", "#c96365", "#ef7e77", "#ffb9b3", "#ffe8e5"]
+        "displayName": "Danger White",
+        "canonical": "#f5f5f5",
+        "tonalRamp": ["#090909", "#171717", "#292929", "#464646", "#666666", "#919191", "#bdbdbd", "#f5f5f5"]
       },
       "danger-surface": {
         "role": "secondary",
         "displayName": "Danger Surface",
-        "canonical": "#3a2223",
-        "tonalRamp": ["#2b1012", "#4b1d20", "#713034", "#9b474b", "#c96365", "#ef7e77", "#ffb9b3", "#ffe8e5"]
+        "canonical": "#202020",
+        "tonalRamp": ["#090909", "#171717", "#202020", "#464646", "#666666", "#919191", "#bdbdbd", "#f5f5f5"]
       }
     },
     "typographyMeta": {
@@ -158,9 +158,9 @@
       "name": "Memory Button",
       "kind": "button",
       "refersTo": "button-memory",
-      "description": "The current-video action, neutral at rest and gold when engaged.",
+      "description": "The current-video action, neutral at rest and white when engaged.",
       "html": "<button class=\"ds-memory-button\">Forget this video</button>",
-      "css": ".ds-memory-button { min-height: 42px; padding: 9px 13px; color: #f5f7f8; background: #272d35; border: 1px solid #5f6a76; border-radius: 5px; font: 650 14px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; cursor: pointer; transition: color 140ms ease-out, background-color 140ms ease-out, border-color 140ms ease-out; } .ds-memory-button:hover { color: #090b0e; background: #f5c451; border-color: #ffe0a3; } .ds-memory-button:focus-visible { outline: 2px solid #ffe0a3; outline-offset: 2px; }"
+      "css": ".ds-memory-button { min-height: 42px; padding: 9px 13px; color: #f5f5f5; background: #292929; border: 1px solid #666666; border-radius: 5px; font: 650 14px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; cursor: pointer; transition: color 140ms ease-out, background-color 140ms ease-out, border-color 140ms ease-out; } .ds-memory-button:hover { color: #090909; background: #f5f5f5; border-color: #ffffff; } .ds-memory-button:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }"
     },
     {
       "name": "Danger Button",
@@ -168,21 +168,21 @@
       "refersTo": "button-danger",
       "description": "The final irreversible clear-data confirmation.",
       "html": "<button class=\"ds-danger-button\">Clear data</button>",
-      "css": ".ds-danger-button { min-height: 42px; padding: 9px 13px; color: #090b0e; background: #ff9a90; border: 1px solid #ff9a90; border-radius: 5px; font: 650 14px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; cursor: pointer; } .ds-danger-button:hover { background: color-mix(in srgb, #ff9a90 82%, white); } .ds-danger-button:focus-visible { outline: 2px solid #ffe0a3; outline-offset: 2px; }"
+      "css": ".ds-danger-button { min-height: 42px; padding: 9px 13px; color: #090909; background: #f5f5f5; border: 1px solid #f5f5f5; border-radius: 5px; font: 650 14px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; cursor: pointer; } .ds-danger-button:hover { background: #ffffff; } .ds-danger-button:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }"
     },
     {
       "name": "Resume Toggle",
       "kind": "input",
       "description": "A native checkbox beneath the compact memory-track treatment.",
       "html": "<label class=\"ds-switch\"><input class=\"ds-switch-input\" type=\"checkbox\" checked aria-label=\"Resume videos\"><span class=\"ds-switch-track\"></span></label>",
-      "css": ".ds-switch { position: relative; display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; } .ds-switch-input { position: absolute; z-index: 1; width: 44px; height: 28px; margin: 0; opacity: 0; cursor: pointer; } .ds-switch-track { position: relative; display: block; width: 44px; height: 26px; background: #090b0e; border: 1px solid #5f6a76; border-radius: 13px; } .ds-switch-track::after { position: absolute; top: 4px; left: 4px; width: 16px; height: 16px; content: ''; background: #b8c0c8; border-radius: 50%; transition: left 160ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-switch-input:checked + .ds-switch-track { background: color-mix(in srgb, #f5c451 32%, #090b0e); border-color: #f5c451; } .ds-switch-input:checked + .ds-switch-track::after { left: 22px; background: #f5c451; } .ds-switch-input:focus-visible + .ds-switch-track { outline: 2px solid #ffe0a3; outline-offset: 2px; }"
+      "css": ".ds-switch { position: relative; display: inline-flex; align-items: center; min-height: 44px; cursor: pointer; } .ds-switch-input { position: absolute; z-index: 1; width: 44px; height: 28px; margin: 0; opacity: 0; cursor: pointer; } .ds-switch-track { position: relative; display: block; width: 44px; height: 26px; background: #090909; border: 1px solid #666666; border-radius: 13px; } .ds-switch-track::after { position: absolute; top: 4px; left: 4px; width: 16px; height: 16px; content: ''; background: #bdbdbd; border-radius: 50%; transition: left 160ms cubic-bezier(0.22, 1, 0.36, 1); } .ds-switch-input:checked + .ds-switch-track { background: color-mix(in srgb, #f5f5f5 32%, #090909); border-color: #f5f5f5; } .ds-switch-input:checked + .ds-switch-track::after { left: 22px; background: #ffffff; } .ds-switch-input:focus-visible + .ds-switch-track { outline: 2px solid #ffffff; outline-offset: 2px; }"
     },
     {
       "name": "Retention Select",
       "kind": "input",
       "description": "A native select with a machined control boundary.",
       "html": "<label class=\"ds-select-label\" for=\"ds-retention\">Keep unfinished positions</label><select class=\"ds-select\" id=\"ds-retention\"><option>90 days</option><option>Never expire</option></select>",
-      "css": ".ds-select-label { display: block; margin-bottom: 8px; color: #f5f7f8; font: 670 14px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-select { min-width: 158px; min-height: 44px; padding: 8px 34px 8px 11px; color: #f5f7f8; background: #272d35; border: 1px solid #5f6a76; border-radius: 5px; font: 14px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-select:focus-visible { outline: 2px solid #ffe0a3; outline-offset: 2px; }"
+      "css": ".ds-select-label { display: block; margin-bottom: 8px; color: #f5f5f5; font: 670 14px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-select { min-width: 158px; min-height: 44px; padding: 8px 34px 8px 11px; color: #f5f5f5; background: #292929; border: 1px solid #666666; border-radius: 5px; font: 14px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-select:focus-visible { outline: 2px solid #ffffff; outline-offset: 2px; }"
     },
     {
       "name": "Memory Counter",
@@ -190,30 +190,30 @@
       "refersTo": "counter-display",
       "description": "The signature recessed display for a saved checkpoint.",
       "html": "<section class=\"ds-counter\"><div class=\"ds-counter-rail\"><span>LOCAL CHECKPOINT</span><span class=\"ds-saved\">● SAVED</span></div><output class=\"ds-time\">12:34</output><p>Building a Firefox extension from scratch</p></section>",
-      "css": ".ds-counter { width: 310px; padding: 15px 16px 14px; color: #f5f7f8; background: #090b0e; border: 1px solid #424b56; border-radius: 7px; box-shadow: inset 0 8px 22px rgb(0 0 0 / 58%), inset 0 1px 0 rgb(255 255 255 / 7%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-counter-rail { display: flex; justify-content: space-between; color: #b8c0c8; font-size: 10px; font-weight: 650; letter-spacing: .1em; } .ds-saved { color: #ffe0a3; } .ds-time { display: block; margin: 21px 0 9px; font: 520 58px/.95 ui-monospace, 'SFMono-Regular', Consolas, monospace; letter-spacing: -.035em; } .ds-counter p { margin: 0; color: #b8c0c8; font-size: 12px; }"
+      "css": ".ds-counter { width: 310px; padding: 15px 16px 14px; color: #f5f5f5; background: #090909; border: 1px solid #464646; border-radius: 7px; box-shadow: inset 0 8px 22px rgb(0 0 0 / 58%), inset 0 1px 0 rgb(255 255 255 / 7%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; } .ds-counter-rail { display: flex; justify-content: space-between; color: #bdbdbd; font-size: 10px; font-weight: 650; letter-spacing: .1em; } .ds-saved { color: #ffffff; } .ds-time { display: block; margin: 21px 0 9px; font: 520 58px/.95 ui-monospace, 'SFMono-Regular', Consolas, monospace; letter-spacing: -.035em; } .ds-counter p { margin: 0; color: #bdbdbd; font-size: 12px; }"
     },
     {
       "name": "State Badge",
       "kind": "chip",
       "description": "A compact redundant text state in the popup header.",
       "html": "<span class=\"ds-state-badge\">ON</span>",
-      "css": ".ds-state-badge { display: inline-block; min-width: 52px; padding: 7px 8px; color: #090b0e; background: #f5c451; border: 1px solid #ffe0a3; border-radius: 5px; font: 650 10px/1 ui-monospace, Consolas, monospace; letter-spacing: .08em; text-align: center; }"
+      "css": ".ds-state-badge { display: inline-block; min-width: 52px; padding: 7px 8px; color: #090909; background: #f5f5f5; border: 1px solid #ffffff; border-radius: 5px; font: 650 10px/1 ui-monospace, Consolas, monospace; letter-spacing: .08em; text-align: center; }"
     }
   ],
   "narrative": {
     "northStar": "The Memory Counter",
-    "overview": "YT Resume borrows the useful grammar of a dedicated video deck: one unmistakable time counter, a small illuminated memory state, compact transport controls, and labels that say exactly what they do. It feels like dependable hardware living in the browser—not a miniature dashboard and not nostalgic decoration.\n\nThe world is restrained, dark, and precise. Matte chassis surfaces frame inset display windows; tabular time is the visual anchor; a single warm status light makes saved state visible. Motion is limited to state changes that communicate recording, restoration, or deletion.",
+    "overview": "YT Resume borrows the useful grammar of a dedicated video deck: one unmistakable time counter, a small illuminated memory state, compact transport controls, and labels that say exactly what they do. It feels like dependable hardware living in the browser—not a miniature dashboard and not nostalgic decoration.\n\nThe world is restrained, monochrome, and precise. Matte black surfaces frame inset display windows; tabular time is the visual anchor; a single white status light makes saved state visible. Motion is limited to state changes that communicate recording, restoration, or deletion.",
     "keyCharacteristics": [
       "A large tabular timecode is the primary status signal.",
-      "Matte graphite planes and inset black displays create hierarchy without card grids.",
-      "One gold memory light marks active or saved state.",
+      "Matte black planes and inset displays create hierarchy without card grids.",
+      "One white signal light marks active or saved state.",
       "Compact literal labels keep controls understandable at toolbar scale.",
       "Decorative video nostalgia is excluded; every deck reference must serve a task."
     ],
     "rules": [
       {
         "name": "The One Lamp Rule",
-        "body": "Gold denotes memory or immediate attention. If several unrelated elements glow at once, the system has lost its hierarchy.",
+        "body": "Bright white denotes memory or immediate attention. If several unrelated elements compete at once, the system has lost its hierarchy.",
         "section": "colors"
       },
       {
@@ -230,7 +230,7 @@
     "dos": [
       "**Do** make saved time and extension state legible in a glance.",
       "**Do** use tabular numerals for every duration and timestamp.",
-      "**Do** give keyboard focus a high-contrast gold treatment and preserve system colors in forced-colors mode.",
+      "**Do** give keyboard focus a high-contrast white treatment and preserve system colors in forced-colors mode.",
       "**Do** preserve familiar checkbox, select, and button behavior beneath the visual language.",
       "**Do** make reduced-motion mode fully still."
     ],
