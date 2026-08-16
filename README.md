@@ -37,15 +37,6 @@ To load the extension manually:
 - **Firefox:** open `about:debugging`, choose **This Firefox**, select **Load Temporary Add-on**, and choose `firefox/manifest.json`.
 - **Chromium:** open `chrome://extensions`, enable **Developer mode**, select **Load unpacked**, and choose the `chromium/` directory.
 
-## Browser directories
-
-Following uBO Lite's repository layout, each browser has a complete, directly loadable extension directory:
-
-- `firefox/` uses `background.scripts` and contains Firefox's `browser_specific_settings`.
-- `chromium/` uses `background.service_worker` and contains no Firefox-only manifest keys.
-
-The shared runtime files are duplicated between the directories and checked for byte-for-byte equality by the test suite.
-
 ## Build
 
 ```bash
