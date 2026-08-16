@@ -39,6 +39,14 @@ test("content script has no permanent interval wakeups", () => {
   assert.match(source, /MutationObserver/);
 });
 
+test("pausing marks activity and immediately saves the checkpoint", () => {
+  const source = readPlatformFile("firefox", "content.js");
+  assert.match(
+    source,
+    /addListener\(session, video, "pause", \(\) => \{\s*stopPeriodicSave\(session\);\s*markActivity\(session\);\s*void saveSession\(session, \{ force: true \}\);\s*\}\);/,
+  );
+});
+
 test("both extensions request only local storage and the YouTube host", () => {
   for (const platform of platforms) {
     const manifest = readManifest(platform);

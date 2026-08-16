@@ -253,6 +253,7 @@
 
     addListener(session, video, "pause", () => {
       stopPeriodicSave(session);
+      markActivity(session);
       void saveSession(session, { force: true });
     });
 
@@ -312,7 +313,7 @@
 
     const message = document.createElement("span");
     message.className = "yt-resume-toast__message";
-    message.textContent = `Resumed locally at ${formatTime(position)}`;
+    message.textContent = `Resumed at ${formatTime(position)}`;
 
     const startOverButton = document.createElement("button");
     startOverButton.type = "button";
@@ -379,7 +380,7 @@
     activeToast = { element, stopTimer };
     startTimer();
     setTimeout(() => {
-      liveRegion.textContent = `Video resumed locally at ${formatTime(position)}. Start over is available.`;
+      liveRegion.textContent = `Video resumed at ${formatTime(position)}. Start over is available.`;
     }, 0);
   }
 
