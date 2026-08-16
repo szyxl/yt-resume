@@ -1,5 +1,5 @@
 .yt-resume-toast {
-  --yt-resume-amber: #ffb84d;
+  --yt-resume-gold: #f5c451;
   --yt-resume-bg: #171a1f;
   --yt-resume-border: #4a535e;
   --yt-resume-muted: #c0c6cc;
@@ -46,8 +46,8 @@
 }
 
 .yt-resume-toast__action {
-  color: var(--yt-resume-amber);
-  border-color: color-mix(in srgb, var(--yt-resume-amber) 55%, transparent);
+  color: var(--yt-resume-gold);
+  border-color: color-mix(in srgb, var(--yt-resume-gold) 55%, transparent);
 }
 
 .yt-resume-toast__dismiss {
@@ -61,7 +61,7 @@
 
 .yt-resume-toast__action:focus-visible,
 .yt-resume-toast__dismiss:focus-visible {
-  outline: 2px solid var(--yt-resume-amber);
+  outline: 2px solid var(--yt-resume-gold);
   outline-offset: 2px;
 }
 

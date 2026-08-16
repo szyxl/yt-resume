@@ -12,6 +12,12 @@ A Firefox extension that privately saves and restores playback positions for sta
 - Supports regular `youtube.com/watch` videos, including playlist links.
 - Does not run in Private Browsing and currently excludes Shorts, live streams, premieres, embeds, and YouTube Music.
 
+## Resource use
+
+The content script is event-driven while idle: it has no permanent polling interval and no periodic save timer on paused videos or non-watch YouTube pages. During playback, one five-second timer preserves the agreed crash-recovery accuracy. Repeated writes are skipped when buffering prevents the playhead from advancing, and stale duplicate tabs stop saving until the user interacts with them again.
+
+The extension has no runtime dependencies, network requests, analytics, or background work outside YouTube.
+
 ## Develop
 
 Requires Firefox 140+ and Node.js.

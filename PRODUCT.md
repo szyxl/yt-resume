@@ -36,7 +36,8 @@ The extension runs on regular `youtube.com/watch` pages. It supports standard on
 - Put “Clear all data” in Settings behind confirmation.
 - Do not operate in Firefox Private Browsing.
 - First release excludes Shorts, live streams, premieres, embeds, and YouTube Music.
-- No account, server, analytics, remote code, or broad host access.
+- No account, server, analytics, remote code, broad host access, runtime dependencies, or permanent polling intervals.
+- Remain event-driven while idle; schedule periodic persistence only during active playback and skip duplicate writes while stalled.
 
 The working name is “YT Resume”; final naming and store branding remain open.
 
@@ -47,6 +48,7 @@ The working name is “YT Resume”; final naming and store branding remain open
 - Respect explicit intent: timestamp links, manual seeking, and replaying override automation.
 - Ask for the narrowest permissions possible.
 - Prefer dependable standard-video behavior over broad but inconsistent coverage.
+- Stay dormant when there is no active playback work.
 
 ## Accessibility & Inclusion
 

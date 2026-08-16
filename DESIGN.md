@@ -11,8 +11,8 @@ colors:
   counter-white: "#f5f7f8"
   label-grey: "#b8c0c8"
   dim-grey: "#8f99a4"
-  memory-amber: "#ffb84d"
-  memory-amber-soft: "#ffd18a"
+  memory-gold: "#f5c451"
+  memory-gold-soft: "#ffe0a3"
   danger-coral: "#ff9a90"
   danger-surface: "#3a2223"
 typography:
@@ -72,7 +72,7 @@ components:
     padding: "9px 13px"
     height: "42px"
   button-memory-hover:
-    backgroundColor: "{colors.memory-amber}"
+    backgroundColor: "{colors.memory-gold}"
     textColor: "{colors.display-black}"
     rounded: "{rounded.control}"
     padding: "9px 13px"
@@ -104,17 +104,17 @@ The world is restrained, dark, and precise. Matte chassis surfaces frame inset d
 **Key Characteristics:**
 - A large tabular timecode is the primary status signal.
 - Matte graphite planes and inset black displays create hierarchy without card grids.
-- One amber memory light marks active or saved state.
+- One gold memory light marks active or saved state.
 - Compact literal labels keep controls understandable at toolbar scale.
 - Decorative video nostalgia is excluded; every deck reference must serve a task.
 
 ## Colors
 
-The palette is restrained: cool graphite neutrals carry the interface while one warm amber accent identifies memory state and focus. Danger coral is isolated to irreversible data clearing and error recovery.
+The palette is restrained: cool graphite neutrals carry the interface while one clear gold accent identifies memory state and focus. Danger coral is isolated to irreversible data clearing and error recovery.
 
 ### Primary
-- **Memory Amber:** Marks a saved checkpoint, enabled state, active memory controls, and keyboard focus.
-- **Memory Amber Soft:** Carries amber text where the stronger fill would be visually heavy.
+- **Memory Gold:** Marks a saved checkpoint, enabled state, active memory controls, and keyboard focus.
+- **Memory Gold Soft:** Carries gold text where the stronger fill would be visually heavy.
 
 ### Secondary
 - **Danger Coral:** Reserved for destructive confirmation and error feedback.
@@ -129,7 +129,7 @@ The palette is restrained: cool graphite neutrals carry the interface while one 
 - **Counter White:** Primary text and time digits.
 - **Label Grey / Dim Grey:** Secondary copy and inactive status.
 
-**The One Lamp Rule.** Amber denotes memory or immediate attention. If several unrelated elements glow at once, the system has lost its hierarchy.
+**The One Lamp Rule.** Gold denotes memory or immediate attention. If several unrelated elements glow at once, the system has lost its hierarchy.
 
 ## Typography
 
@@ -170,9 +170,9 @@ The form language is rectilinear with subtly eased 5px control corners and 7px d
 
 ### Buttons
 - **Shape:** Compact eased corners (5px), at least 42px tall.
-- **Memory action:** Neutral at rest; amber fill with display-black text on hover or activation.
+- **Memory action:** Neutral at rest; gold fill with display-black text on hover or activation.
 - **Danger action:** Coral fill with dark text, visible only after explicit confirmation.
-- **Focus:** A two-pixel soft-amber outline with a two-pixel offset.
+- **Focus:** A two-pixel soft-gold outline with a two-pixel offset.
 
 ### Cards / Containers
 - **Counter display:** Recessed black field with a structural grey seam, small corner easing, and inner depth.
@@ -181,7 +181,7 @@ The form language is rectilinear with subtly eased 5px control corners and 7px d
 
 ### Inputs / Fields
 - **Select:** Control-grey field, strong seam, 44px minimum height, and native menu behavior.
-- **Toggle:** Familiar checkbox semantics beneath a custom 44×26px track; amber means enabled, and forced-colors mode restores the native checkbox.
+- **Toggle:** Familiar checkbox semantics beneath a custom 44×26px track; gold means enabled, and forced-colors mode restores the native checkbox.
 
 ### Navigation
 - **Settings action:** A literal text button rather than a gear icon. It stays neutral until hover, then gains a control-grey field and seam.
@@ -194,7 +194,7 @@ The form language is rectilinear with subtly eased 5px control corners and 7px d
 ### Do:
 - **Do** make saved time and extension state legible in a glance.
 - **Do** use tabular numerals for every duration and timestamp.
-- **Do** give keyboard focus a high-contrast amber treatment and preserve system colors in forced-colors mode.
+- **Do** give keyboard focus a high-contrast gold treatment and preserve system colors in forced-colors mode.
 - **Do** preserve familiar checkbox, select, and button behavior beneath the visual language.
 - **Do** make reduced-motion mode fully still.
 

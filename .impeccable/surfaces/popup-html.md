@@ -23,7 +23,7 @@ Firefox users need to verify that local resume is active, inspect the current vi
 
 ## Direction
 
-“The Memory Counter”: a compact dedicated-video-deck control surface with a dominant tabular timecode, matte graphite chassis, inset display, literal controls, and one amber memory lamp. The memorable moment is seeing the local checkpoint as a physical-feeling time counter rather than an abstract settings row.
+“The Memory Counter”: a compact dedicated-video-deck control surface with a dominant tabular timecode, matte graphite chassis, inset display, literal controls, and one gold memory lamp. The memorable moment is seeing the local checkpoint as a physical-feeling time counter rather than an abstract settings row.
 
 ## Constraints
 

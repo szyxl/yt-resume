@@ -9,15 +9,15 @@
   --color-text: #f5f7f8;
   --color-muted: #b8c0c8;
   --color-dim: #8f99a4;
-  --color-memory: #ffb84d;
-  --color-memory-soft: #ffd18a;
+  --color-memory: #f5c451;
+  --color-memory-soft: #ffe0a3;
   --color-danger: #ff9a90;
   --color-danger-surface: #3a2223;
   --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --font-counter: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --radius-control: 5px;
   --radius-display: 7px;
-  --focus-ring: #ffd18a;
+  --focus-ring: #ffe0a3;
 }
 
 * {

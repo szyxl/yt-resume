@@ -11,7 +11,8 @@
   } = globalThis.YTResume;
 
   const SAVE_INTERVAL_MS = 5000;
-  const PLAYER_CHECK_INTERVAL_MS = 200;
+  const INITIAL_PLAYER_CHECK_INTERVAL_MS = 100;
+  const MAX_PLAYER_CHECK_INTERVAL_MS = 1000;
   const RESTORE_SETTLE_MS = 300;
   const TOAST_LIFETIME_MS = 5000;
 
@@ -101,7 +102,8 @@
           return;
         }
 
-        session.playerCheckTimer = setTimeout(check, PLAYER_CHECK_INTERVAL_MS);
+        session.playerCheckTimer = setTimeout(check, session.playerCheckDelay);
+        session.playerCheckDelay = Math.min(session.playerCheckDelay * 2, MAX_PLAYER_CHECK_INTERVAL_MS);
       }
 
       check();
@@ -115,10 +117,11 @@
 
   function markActivity(session) {
     session.hasActivity = true;
+    session.isStaleWriter = false;
     session.activityAt = Date.now();
   }
 
-  async function saveSession(session) {
+  async function saveSession(session, { force = false } = {}) {
     if (!session || !session.video || !session.settings.enabled || !session.hasActivity) {
       return null;
     }
@@ -129,6 +132,14 @@
       return null;
     }
 
+    const positionDidNotAdvance = Number.isFinite(session.lastPersistedPosition)
+      && Math.abs(position - session.lastPersistedPosition) < 1;
+    const samePositionIsPending = Number.isFinite(session.pendingPosition)
+      && Math.abs(position - session.pendingPosition) < 1;
+    if (!force && (positionDidNotAdvance || samePositionIsPending)) {
+      return null;
+    }
+
     const payload = {
       videoId: session.context.videoId,
       writerId: session.writerId,
@@ -136,6 +147,7 @@
       position,
       duration,
     };
+    session.pendingPosition = position;
 
     if (currentSession === session) {
       publicState.record = isRestorable(position, duration)
@@ -148,12 +160,21 @@
 
     try {
       const result = await sendMessage("progress:save", { payload });
+      session.lastPersistedPosition = position;
+      session.isStaleWriter = result?.saved === false && result.reason === "stale";
+      if (session.isStaleWriter) {
+        stopPeriodicSave(session);
+      }
       if (currentSession === session && result) {
         publicState.record = result.record || null;
       }
       return result;
     } catch {
       return null;
+    } finally {
+      if (session.pendingPosition === position) {
+        session.pendingPosition = null;
+      }
     }
   }
 
@@ -183,12 +204,41 @@
     }
   }
 
+  function stopPeriodicSave(session) {
+    clearTimeout(session.saveTimer);
+    session.saveTimer = null;
+  }
+
+  function schedulePeriodicSave(session) {
+    stopPeriodicSave(session);
+    if (
+      session.destroyed
+      || session.isStaleWriter
+      || !session.video
+      || session.video.paused
+      || session.video.ended
+    ) {
+      return;
+    }
+
+    session.saveTimer = setTimeout(async () => {
+      session.saveTimer = null;
+      if (!session.destroyed && !session.video.paused && !session.video.ended) {
+        if (!isAdPlaying(session.video)) {
+          await saveSession(session);
+        }
+        schedulePeriodicSave(session);
+      }
+    }, SAVE_INTERVAL_MS);
+  }
+
   function attachPlaybackListeners(session) {
     const { video } = session;
 
     addListener(session, video, "play", () => {
       markActivity(session);
-      void saveSession(session);
+      void saveSession(session, { force: true });
+      schedulePeriodicSave(session);
     });
 
     addListener(session, video, "seeked", () => {
@@ -196,14 +246,17 @@
         return;
       }
       markActivity(session);
-      void saveSession(session);
+      void saveSession(session, { force: true });
+      schedulePeriodicSave(session);
     });
 
     addListener(session, video, "pause", () => {
-      void saveSession(session);
+      stopPeriodicSave(session);
+      void saveSession(session, { force: true });
     });
 
     addListener(session, video, "ended", () => {
+      stopPeriodicSave(session);
       markActivity(session);
       void deleteSessionProgress(session, "completed");
     });
@@ -211,19 +264,15 @@
     addListener(session, document, "visibilitychange", () => {
       if (document.visibilityState === "visible" && !video.paused && !video.ended) {
         markActivity(session);
+        schedulePeriodicSave(session);
       }
-      void saveSession(session);
+      void saveSession(session, { force: true });
     });
-
-    session.saveInterval = setInterval(() => {
-      if (!video.paused && !video.ended && !isAdPlaying(video)) {
-        void saveSession(session);
-      }
-    }, SAVE_INTERVAL_MS);
 
     if (!video.paused && !video.ended) {
       markActivity(session);
-      void saveSession(session);
+      void saveSession(session, { force: true });
+      schedulePeriodicSave(session);
     }
   }
 
@@ -312,7 +361,7 @@
 
       markActivity(session);
       session.video.currentTime = 0;
-      void saveSession(session);
+      void saveSession(session, { force: true });
       removeToast();
     });
 
@@ -406,13 +455,13 @@
     }
 
     if (save) {
-      void saveSession(session);
+      void saveSession(session, { force: true });
     }
 
     currentSession = null;
     session.destroyed = true;
     clearTimeout(session.playerCheckTimer);
-    clearInterval(session.saveInterval);
+    stopPeriodicSave(session);
     for (const cleanup of session.cleanups) {
       cleanup();
     }
@@ -442,10 +491,14 @@
       context,
       destroyed: false,
       hasActivity: false,
+      isStaleWriter: false,
+      lastPersistedPosition: null,
+      pendingPosition: null,
+      playerCheckDelay: INITIAL_PLAYER_CHECK_INTERVAL_MS,
       playerCheckTimer: null,
       record: null,
       restoring: false,
-      saveInterval: null,
+      saveTimer: null,
       settings: { ...settings },
       video: null,
       writerId: makeWriterId(),
@@ -476,6 +529,7 @@
 
     session.settings = { ...settings };
     session.record = record;
+    session.lastPersistedPosition = Number(record?.position);
     publicState.enabled = settings.enabled;
     publicState.record = record;
     publicState.title = getVideoTitle();
@@ -597,7 +651,7 @@
     const nextSettings = normalizeSettings(changes.settings.newValue);
 
     if (previousSettings.enabled && !nextSettings.enabled && currentSession) {
-      void saveSession(currentSession);
+      void saveSession(currentSession, { force: true });
     }
 
     if (settingsWereCleared && currentSession) {
@@ -616,21 +670,30 @@
     }
   });
 
-  document.addEventListener("yt-navigate-start", () => stopCurrentSession(true));
-  document.addEventListener("yt-navigate-finish", () => scheduleStart());
-  window.addEventListener("popstate", () => scheduleStart());
-  window.addEventListener("pagehide", () => {
-    if (currentSession) {
-      void saveSession(currentSession);
-    }
-  });
-
-  setInterval(() => {
+  function checkForLocationChange() {
     if (location.href !== lastObservedUrl) {
       lastObservedUrl = location.href;
       scheduleStart();
     }
-  }, 1000);
+  }
+
+  const navigationObserver = new MutationObserver(checkForLocationChange);
+  navigationObserver.observe(document.head, {
+    characterData: true,
+    childList: true,
+    subtree: true,
+  });
+
+  document.addEventListener("yt-navigate-start", () => stopCurrentSession(true));
+  document.addEventListener("yt-navigate-finish", () => scheduleStart());
+  window.addEventListener("hashchange", checkForLocationChange);
+  window.addEventListener("popstate", checkForLocationChange);
+  window.addEventListener("pageshow", checkForLocationChange);
+  window.addEventListener("pagehide", () => {
+    if (currentSession) {
+      void saveSession(currentSession, { force: true });
+    }
+  });
 
   scheduleStart(true);
 })();
