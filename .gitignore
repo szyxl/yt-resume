@@ -3,4 +3,5 @@ web-ext-artifacts/
 web-ext-profile/
 *.xpi
 DESIGN.md
+PRODUCT.md
 .DS_Store
