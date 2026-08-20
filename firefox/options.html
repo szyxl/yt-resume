@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>YT Resume settings</title>
+    <link rel="icon" href="icons/icon-flat-32.png" sizes="32x32" type="image/png">
     <link rel="stylesheet" href="ui.css">
     <script src="browser-api.js" defer></script>
     <script src="logic.js" defer></script>
@@ -32,6 +33,17 @@
           </div>
           <label class="switch-control switch-control--standalone" for="settings-enabled">
             <input class="switch-control__input" id="settings-enabled" type="checkbox" aria-labelledby="resume-setting-label">
+            <span class="switch-control__track" aria-hidden="true"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-copy">
+            <span class="setting-label" id="resume-message-setting-label">Show resume message</span>
+            <p>Display “Resumed at …” after restoring a video.</p>
+          </div>
+          <label class="switch-control switch-control--standalone" for="settings-show-resume-message">
+            <input class="switch-control__input" id="settings-show-resume-message" type="checkbox" aria-labelledby="resume-message-setting-label">
             <span class="switch-control__track" aria-hidden="true"></span>
           </label>
         </div>

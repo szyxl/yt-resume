@@ -5,6 +5,7 @@ A Firefox and Chromium extension that privately saves and restores playback posi
 ## Behavior
 
 - Restores one local checkpoint per YouTube video.
+- Shows an in-player resume message by default, with a setting to hide it.
 - Saves every five seconds and on pause, seek, navigation, and page exit.
 - For timestamp links, restores the local checkpoint unless the URL time is more than one minute ahead.
 - Ignores positions below five seconds and clears completed or nearly completed videos.

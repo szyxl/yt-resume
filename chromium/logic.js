@@ -15,6 +15,7 @@
   const DEFAULT_SETTINGS = Object.freeze({
     enabled: true,
     retentionDays: 7,
+    showResumeMessage: true,
   });
   const RETENTION_OPTIONS = Object.freeze([7, 30, 90, 180, 365, 0]);
   const PROGRESS_KEY_PREFIX = "progress:";
@@ -30,6 +31,9 @@
     return {
       enabled: typeof source.enabled === "boolean" ? source.enabled : DEFAULT_SETTINGS.enabled,
       retentionDays,
+      showResumeMessage: typeof source.showResumeMessage === "boolean"
+        ? source.showResumeMessage
+        : DEFAULT_SETTINGS.showResumeMessage,
     };
   }
 

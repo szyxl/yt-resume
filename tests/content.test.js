@@ -95,7 +95,7 @@ class FakeVideo extends FakeEventTarget {
   }
 }
 
-test("radio mixes are skipped and local checkpoints survive YouTube SPA player changes", async () => {
+test("radio mixes are skipped, resume messages are optional, and checkpoints survive player changes", async () => {
   const realSetTimeout = globalThis.setTimeout;
   const realClearTimeout = globalThis.clearTimeout;
   const player = new FakeElement();
@@ -127,6 +127,7 @@ test("radio mixes are skipped and local checkpoints survive YouTube SPA player c
   globalThis.YTResume = require("../firefox/logic.js");
   const sentMessages = [];
   let messageListener = null;
+  let showResumeMessage = false;
   globalThis.YTResumeBrowser = {
     addMessageListener(listener) {
       messageListener = listener;
@@ -134,7 +135,7 @@ test("radio mixes are skipped and local checkpoints survive YouTube SPA player c
     sendRuntimeMessage(message) {
       sentMessages.push(message);
       if (message.type === "settings:get") {
-        return Promise.resolve({ enabled: true, retentionDays: 90 });
+        return Promise.resolve({ enabled: true, retentionDays: 90, showResumeMessage });
       }
       if (message.type === "progress:get" && message.videoId === "dQw4w9WgXcQ") {
         return Promise.resolve({
@@ -197,7 +198,9 @@ test("radio mixes are skipped and local checkpoints survive YouTube SPA player c
 
     await new Promise((resolve) => realSetTimeout(resolve, 30));
     assert.equal(video.currentTime, 431);
+    assert.equal(player.children.length, 0);
 
+    showResumeMessage = true;
     document.dispatchEvent({ type: "yt-navigate-start" });
     globalThis.location.href = "https://www.youtube.com/watch?v=otherVideo1&t=157s";
     document.dispatchEvent({ type: "yt-navigate-finish" });
@@ -211,6 +214,7 @@ test("radio mixes are skipped and local checkpoints survive YouTube SPA player c
 
     await new Promise((resolve) => realSetTimeout(resolve, 40));
     assert.equal(video.currentTime, 1200, `Player assignments: ${video.assignedTimes.join(", ")}`);
+    assert.equal(player.children.length, 1);
   } finally {
     globalThis.setTimeout = realSetTimeout;
     globalThis.clearTimeout = realClearTimeout;

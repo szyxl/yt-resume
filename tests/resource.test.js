@@ -99,6 +99,17 @@ test("popup and settings reuse the shared logo artwork", () => {
   }
 });
 
+test("settings tabs use the extension logo as their favicon", () => {
+  for (const platform of platforms) {
+    const source = readPlatformFile(platform, "options.html");
+
+    assert.match(
+      source,
+      /<link rel="icon" href="icons\/icon-flat-32\.png" sizes="32x32" type="image\/png">/,
+    );
+  }
+});
+
 test("popup clearly identifies unavailable and deliberately unsaved playback", () => {
   const source = readPlatformFile("firefox", "popup.js");
 
@@ -110,6 +121,21 @@ test("settings offer seven-day checkpoint retention", () => {
   for (const platform of platforms) {
     const source = readPlatformFile(platform, "options.html");
     assert.match(source, /<option value="7">7 days<\/option>/);
+  }
+});
+
+test("settings can hide the in-player resume message", () => {
+  for (const platform of platforms) {
+    const source = readPlatformFile(platform, "options.html");
+    const script = readPlatformFile(platform, "options.js");
+
+    assert.match(source, /id="resume-message-setting-label">Show resume message<\/span>/);
+    assert.match(
+      source,
+      /id="settings-show-resume-message" type="checkbox" aria-labelledby="resume-message-setting-label">/,
+    );
+    assert.match(script, /showResumeMessage: document\.querySelector\("#settings-show-resume-message"\)/);
+    assert.match(script, /patch: \{ showResumeMessage \}/);
   }
 });
 

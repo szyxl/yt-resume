@@ -106,13 +106,33 @@ test("expires records using the configured retention period", () => {
 });
 
 test("normalizes settings to supported values", () => {
-  assert.deepEqual(DEFAULT_SETTINGS, { enabled: true, retentionDays: 7 });
-  assert.deepEqual(normalizeSettings({ enabled: true, retentionDays: 7 }), DEFAULT_SETTINGS);
+  assert.deepEqual(DEFAULT_SETTINGS, {
+    enabled: true,
+    retentionDays: 7,
+    showResumeMessage: true,
+  });
+  assert.deepEqual(
+    normalizeSettings({ enabled: true, retentionDays: 7, showResumeMessage: true }),
+    DEFAULT_SETTINGS,
+  );
   assert.deepEqual(normalizeSettings({ enabled: false, retentionDays: 365 }), {
     enabled: false,
     retentionDays: 365,
+    showResumeMessage: true,
   });
-  assert.deepEqual(normalizeSettings({ enabled: "no", retentionDays: 17 }), DEFAULT_SETTINGS);
+  assert.deepEqual(normalizeSettings({
+    enabled: false,
+    retentionDays: 365,
+    showResumeMessage: false,
+  }), {
+    enabled: false,
+    retentionDays: 365,
+    showResumeMessage: false,
+  });
+  assert.deepEqual(
+    normalizeSettings({ enabled: "no", retentionDays: 17, showResumeMessage: "no" }),
+    DEFAULT_SETTINGS,
+  );
 });
 
 test("accepts only the most recent writer activity", () => {

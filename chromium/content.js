@@ -521,7 +521,11 @@
       session.restoring = false;
     }
 
-    if (isCurrentSessionForLocation(session) && restoredPositionIsCurrent) {
+    if (
+      isCurrentSessionForLocation(session)
+      && restoredPositionIsCurrent
+      && session.settings.showResumeMessage
+    ) {
       showRestoreToast(session, target);
     }
   }
@@ -736,6 +740,10 @@
       currentSession.hasActivity = false;
       currentSession.record = null;
       publicState.record = null;
+    }
+
+    if (previousSettings.showResumeMessage && !nextSettings.showResumeMessage) {
+      removeToast();
     }
 
     settings = nextSettings;

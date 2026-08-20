@@ -83,11 +83,12 @@ test("background registers lifecycle and message listeners", () => {
   assert.equal(typeof startupListener, "function");
 });
 
-test("settings default to enabled with 7-day retention", async () => {
+test("settings default to enabled with 7-day retention and resume messages visible", async () => {
   await dispatch("data:clear");
   assert.deepEqual(await dispatch("settings:get"), {
     enabled: true,
     retentionDays: 7,
+    showResumeMessage: true,
   });
 });
 
@@ -181,15 +182,21 @@ test("early and nearly complete positions become non-restoring tombstones", asyn
 });
 
 test("clear all resets settings and progress", async () => {
-  await dispatch("settings:update", { patch: { enabled: false, retentionDays: 365 } });
+  await dispatch("settings:update", {
+    patch: { enabled: false, retentionDays: 365, showResumeMessage: false },
+  });
   const cleared = await dispatch("data:clear");
 
   assert.deepEqual(cleared, {
-    settings: { enabled: true, retentionDays: 7 },
+    settings: { enabled: true, retentionDays: 7, showResumeMessage: true },
     count: 0,
   });
   assert.deepEqual(await dispatch("progress:stats"), { count: 0 });
-  assert.deepEqual(await dispatch("settings:get"), { enabled: true, retentionDays: 7 });
+  assert.deepEqual(await dispatch("settings:get"), {
+    enabled: true,
+    retentionDays: 7,
+    showResumeMessage: true,
+  });
 });
 
 test("background rejects messages beyond its pending-operation bound", async () => {

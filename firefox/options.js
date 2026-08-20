@@ -14,6 +14,7 @@
     retention: document.querySelector("#retention-select"),
     savedCount: document.querySelector("#saved-count"),
     savedCountLabel: document.querySelector("#saved-count-label"),
+    showResumeMessage: document.querySelector("#settings-show-resume-message"),
   };
 
   function announce(message, isError = false) {
@@ -24,6 +25,7 @@
   function renderSettings(settings) {
     elements.enabled.checked = settings.enabled;
     elements.retention.value = String(settings.retentionDays);
+    elements.showResumeMessage.checked = settings.showResumeMessage;
   }
 
   function renderCount(count) {
@@ -72,6 +74,26 @@
       announce("Couldn't update automatic resume. Try again.", true);
     } finally {
       elements.enabled.disabled = false;
+    }
+  });
+
+  elements.showResumeMessage.addEventListener("change", async () => {
+    const showResumeMessage = elements.showResumeMessage.checked;
+    elements.showResumeMessage.disabled = true;
+    announce("");
+
+    try {
+      const settings = await sendRuntimeMessage({
+        type: "settings:update",
+        patch: { showResumeMessage },
+      });
+      renderSettings(normalizeSettings(settings));
+      announce(showResumeMessage ? "Resume messages are shown." : "Resume messages are hidden.");
+    } catch {
+      elements.showResumeMessage.checked = !showResumeMessage;
+      announce("Couldn't update resume messages. Try again.", true);
+    } finally {
+      elements.showResumeMessage.disabled = false;
     }
   });
 
