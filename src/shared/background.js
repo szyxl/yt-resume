@@ -59,21 +59,32 @@ async function getStoredRecord(videoId) {
   return stored[key] || null;
 }
 
-async function getProgress(videoId) {
+function shouldRemoveStoredRecord(record, settings, now = Date.now()) {
+  const tombstoneExpired = record.deleted
+    && now - Number(record.updatedAt || 0) > TOMBSTONE_LIFETIME_MS;
+  const progressExpired = !record.deleted && isExpired(record, settings.retentionDays, now);
+  return tombstoneExpired || progressExpired;
+}
+
+async function getSessionState(videoId) {
   const key = progressKey(videoId);
-  const [record, settings] = await Promise.all([getStoredRecord(videoId), getSettings()]);
+  const stored = await browser.storage.local.get([SETTINGS_KEY, key]);
+  const settings = normalizeSettings(stored[SETTINGS_KEY]);
+  let record = stored[key] || null;
 
-  if (!record) {
-    return null;
-  }
-
-  const tombstoneExpired = record.deleted && Date.now() - Number(record.updatedAt || 0) > TOMBSTONE_LIFETIME_MS;
-  if (tombstoneExpired || (!record.deleted && isExpired(record, settings.retentionDays))) {
+  if (record && shouldRemoveStoredRecord(record, settings)) {
     await browser.storage.local.remove(key);
-    return null;
+    record = null;
   }
 
-  return record.deleted ? null : record;
+  return {
+    settings,
+    record: record && !record.deleted ? record : null,
+  };
+}
+
+async function getProgress(videoId) {
+  return (await getSessionState(videoId)).record;
 }
 
 async function enforceProgressCapacity(incomingKey = null) {
@@ -164,24 +175,29 @@ async function saveProgress(payload) {
   return { saved: true, record };
 }
 
-async function cleanupExpiredProgress(settings = null) {
-  const effectiveSettings = settings || await getSettings();
-  const all = await browser.storage.local.get(null);
-  const now = Date.now();
+function inspectProgressStorage(stored, settings, now = Date.now()) {
+  let count = 0;
   const keysToRemove = [];
 
-  for (const [key, record] of Object.entries(all)) {
+  for (const [key, record] of Object.entries(stored)) {
     if (!isProgressKey(key) || !record) {
       continue;
     }
 
-    const tombstoneExpired = record.deleted && now - Number(record.updatedAt || 0) > TOMBSTONE_LIFETIME_MS;
-    const progressExpired = !record.deleted && isExpired(record, effectiveSettings.retentionDays, now);
-
-    if (tombstoneExpired || progressExpired) {
+    if (shouldRemoveStoredRecord(record, settings, now)) {
       keysToRemove.push(key);
+    } else if (!record.deleted) {
+      count += 1;
     }
   }
+
+  return { count, keysToRemove };
+}
+
+async function cleanupExpiredProgress(settings = null) {
+  const all = await browser.storage.local.get(null);
+  const effectiveSettings = settings || normalizeSettings(all[SETTINGS_KEY]);
+  const { keysToRemove } = inspectProgressStorage(all, effectiveSettings);
 
   if (keysToRemove.length > 0) {
     await browser.storage.local.remove(keysToRemove);
@@ -191,9 +207,14 @@ async function cleanupExpiredProgress(settings = null) {
 }
 
 async function getStats() {
-  await cleanupExpiredProgress();
   const all = await browser.storage.local.get(null);
-  const count = Object.entries(all).filter(([key, record]) => isProgressKey(key) && record && !record.deleted).length;
+  const settings = normalizeSettings(all[SETTINGS_KEY]);
+  const { count, keysToRemove } = inspectProgressStorage(all, settings);
+
+  if (keysToRemove.length > 0) {
+    await browser.storage.local.remove(keysToRemove);
+  }
+
   return { count };
 }
 
@@ -208,6 +229,8 @@ async function handleMessage(message) {
       return getSettings();
     case "settings:update":
       return updateSettings(message.patch || {});
+    case "session:get":
+      return getSessionState(message.videoId);
     case "progress:get":
       return getProgress(message.videoId);
     case "progress:save":

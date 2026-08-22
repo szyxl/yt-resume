@@ -2,6 +2,10 @@
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
+const logic = require("../src/shared/logic.js");
+const {
+  createPlaybackSessionController,
+} = require("../src/shared/playback-session.js");
 
 class FakeEventTarget {
   constructor() {
@@ -95,11 +99,14 @@ class FakeVideo extends FakeEventTarget {
   }
 }
 
-test("radio mixes are skipped, resume messages are optional, and checkpoints survive player changes", async () => {
+test("playback session controller restores checkpoints and cleans up its lifecycle", async () => {
   const realSetTimeout = globalThis.setTimeout;
   const realClearTimeout = globalThis.clearTimeout;
   const player = new FakeElement();
   const video = new FakeVideo(player);
+  let videoAvailable = true;
+  let videoQueryCount = 0;
+  const titleElement = new FakeElement();
   const watchPage = new FakeElement();
   watchPage.setAttribute("video-id", "dQw4w9WgXcQ");
   const document = new FakeEventTarget();
@@ -109,10 +116,14 @@ test("radio mixes are skipped, resume messages are optional, and checkpoints sur
   document.visibilityState = "visible";
   document.querySelector = (selector) => {
     if (selector === "video.html5-main-video") {
-      return video;
+      videoQueryCount += 1;
+      return videoAvailable ? video : null;
     }
     if (selector === ".html5-video-player") {
       return player;
+    }
+    if (selector === "title") {
+      return titleElement;
     }
     if (selector === "ytd-watch-flexy") {
       return watchPage;
@@ -121,69 +132,132 @@ test("radio mixes are skipped, resume messages are optional, and checkpoints sur
   };
   document.createElement = () => new FakeElement();
 
-  globalThis.setTimeout = (callback, milliseconds, ...args) =>
-    realSetTimeout(callback, Math.min(milliseconds, 2), ...args);
-  globalThis.clearTimeout = realClearTimeout;
-  globalThis.YTResume = require("../firefox/logic.js");
+  const clock = { now: () => Date.now() };
   const sentMessages = [];
   let messageListener = null;
+  let storageChangeListener = null;
   let showResumeMessage = false;
-  globalThis.YTResumeBrowser = {
+  let holdNextProgressSave = false;
+  let releaseHeldProgressSave = null;
+
+  function getRecord(videoId) {
+    if (videoId === "dQw4w9WgXcQ") {
+      return {
+        videoId,
+        writerId: "saved",
+        activityAt: 1,
+        position: 431,
+        duration: 900,
+        updatedAt: 1,
+      };
+    }
+
+    if (videoId === "otherVideo1") {
+      return {
+        videoId,
+        writerId: "saved",
+        activityAt: 2,
+        position: 1200,
+        duration: 3600,
+        updatedAt: 2,
+      };
+    }
+
+    return null;
+  }
+
+  const browserApi = {
     addMessageListener(listener) {
       messageListener = listener;
+      return () => {
+        if (messageListener === listener) {
+          messageListener = null;
+        }
+      };
     },
     sendRuntimeMessage(message) {
       sentMessages.push(message);
-      if (message.type === "settings:get") {
-        return Promise.resolve({ enabled: true, retentionDays: 90, showResumeMessage });
-      }
-      if (message.type === "progress:get" && message.videoId === "dQw4w9WgXcQ") {
+      if (message.type === "session:get") {
         return Promise.resolve({
-          videoId: "dQw4w9WgXcQ",
-          writerId: "saved",
-          activityAt: 1,
-          position: 431,
-          duration: 900,
-          updatedAt: 1,
+          settings: { enabled: true, retentionDays: 90, showResumeMessage },
+          record: getRecord(message.videoId),
         });
       }
-      if (message.type === "progress:get" && message.videoId === "otherVideo1") {
-        return Promise.resolve({
-          videoId: "otherVideo1",
-          writerId: "saved",
-          activityAt: 2,
-          position: 1200,
-          duration: 3600,
-          updatedAt: 2,
-        });
+      if (message.type === "progress:get") {
+        return Promise.resolve(getRecord(message.videoId));
+      }
+      if (message.type === "progress:save") {
+        const result = {
+          saved: true,
+          record: { ...message.payload, updatedAt: clock.now() },
+        };
+        if (holdNextProgressSave) {
+          holdNextProgressSave = false;
+          return new Promise((resolve) => {
+            releaseHeldProgressSave = () => resolve(result);
+          });
+        }
+        return Promise.resolve(result);
       }
       return Promise.resolve(null);
     },
   };
-  globalThis.browser = {
+  const browser = {
     storage: {
       onChanged: {
-        addListener() {},
+        addListener(listener) {
+          storageChangeListener = listener;
+        },
+        removeListener(listener) {
+          if (storageChangeListener === listener) {
+            storageChangeListener = null;
+          }
+        },
       },
     },
   };
-  globalThis.location = {
-    href: "https://www.youtube.com/",
-  };
-  globalThis.document = document;
-  globalThis.window = new FakeEventTarget();
-  globalThis.HTMLMediaElement = { HAVE_METADATA: 1 };
-  globalThis.MutationObserver = class {
-    observe() {}
-  };
-  globalThis.matchMedia = () => ({ matches: true });
+  const location = { href: "https://www.youtube.com/" };
+  const window = new FakeEventTarget();
+  let navigationObservation = null;
+  let navigationObserverDisconnected = false;
+  class FakeMutationObserver {
+    observe(target, options) {
+      navigationObservation = { target, options };
+    }
 
+    disconnect() {
+      navigationObserverDisconnected = true;
+    }
+  }
+  const environment = {
+    browser,
+    clearTimeout: realClearTimeout,
+    crypto: { randomUUID: () => "test-writer-id" },
+    Date: clock,
+    document,
+    HTMLMediaElement: { HAVE_METADATA: 1 },
+    location,
+    matchMedia: () => ({ matches: true }),
+    Math,
+    MutationObserver: FakeMutationObserver,
+    performance,
+    setTimeout: (callback, milliseconds, ...args) =>
+      realSetTimeout(callback, Math.min(milliseconds, 2), ...args),
+    window,
+  };
+
+  let controller = null;
   try {
-    require("../firefox/content.js");
+    controller = createPlaybackSessionController({ browserApi, environment, logic });
+    controller.start();
     await new Promise((resolve) => realSetTimeout(resolve, 10));
+    assert.deepEqual(navigationObservation, {
+      target: titleElement,
+      options: { characterData: true, childList: true, subtree: true },
+    });
 
     document.dispatchEvent({ type: "yt-navigate-start" });
-    globalThis.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&start_radio=1";
+    location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&start_radio=1";
     document.dispatchEvent({ type: "yt-navigate-finish" });
 
     await new Promise((resolve) => realSetTimeout(resolve, 10));
@@ -193,7 +267,7 @@ test("radio mixes are skipped, resume messages are optional, and checkpoints sur
     assert.equal(radioState.reason, "YouTube Mix and Radio playback isn't saved.");
 
     document.dispatchEvent({ type: "yt-navigate-start" });
-    globalThis.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=303s";
+    location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=303s";
     document.dispatchEvent({ type: "yt-navigate-finish" });
 
     await new Promise((resolve) => realSetTimeout(resolve, 30));
@@ -202,7 +276,7 @@ test("radio mixes are skipped, resume messages are optional, and checkpoints sur
 
     showResumeMessage = true;
     document.dispatchEvent({ type: "yt-navigate-start" });
-    globalThis.location.href = "https://www.youtube.com/watch?v=otherVideo1&t=157s";
+    location.href = "https://www.youtube.com/watch?v=otherVideo1&t=157s";
     document.dispatchEvent({ type: "yt-navigate-finish" });
 
     realSetTimeout(() => {
@@ -215,8 +289,56 @@ test("radio mixes are skipped, resume messages are optional, and checkpoints sur
     await new Promise((resolve) => realSetTimeout(resolve, 40));
     assert.equal(video.currentTime, 1200, `Player assignments: ${video.assignedTimes.join(", ")}`);
     assert.equal(player.children.length, 1);
+    assert.equal(sentMessages.some((message) => message.type === "settings:get"), false);
+
+    holdNextProgressSave = true;
+    video._currentTime = 1205;
+    video.paused = false;
+    video.dispatchEvent({ type: "play" });
+    video.paused = true;
+    assert.equal(typeof releaseHeldProgressSave, "function");
+
+    video._currentTime = 1234;
+    location.href = "https://www.youtube.com/";
+    document.dispatchEvent({ type: "yt-navigate-start" });
+    releaseHeldProgressSave();
+
+    await new Promise((resolve) => realSetTimeout(resolve, 10));
+    const savedPositions = sentMessages
+      .filter((message) => message.type === "progress:save")
+      .map((message) => message.payload.position);
+    assert.equal(savedPositions.at(-1), 1234);
+
+    videoAvailable = false;
+    const realNow = clock.now;
+    let fakeNow = realNow();
+    clock.now = () => {
+      fakeNow += 10_000;
+      return fakeNow;
+    };
+
+    try {
+      location.href = "https://www.youtube.com/watch?v=thirdVideo1";
+      document.dispatchEvent({ type: "yt-navigate-finish" });
+      await new Promise((resolve) => realSetTimeout(resolve, 20));
+
+      const queriesAfterTimeout = videoQueryCount;
+      await new Promise((resolve) => realSetTimeout(resolve, 10));
+      assert.equal(videoQueryCount, queriesAfterTimeout);
+      const unavailableState = await messageListener({ type: "page:get-state" });
+      assert.equal(unavailableState.reason, "Video player unavailable. Reload YouTube to try again.");
+    } finally {
+      clock.now = realNow;
+    }
+
+    controller.dispose();
+    controller = null;
+    assert.equal(messageListener, null);
+    assert.equal(storageChangeListener, null);
+    assert.equal(navigationObserverDisconnected, true);
+    assert.equal((document.listeners.get("yt-navigate-start") || []).length, 0);
+    assert.equal((window.listeners.get("pagehide") || []).length, 0);
   } finally {
-    globalThis.setTimeout = realSetTimeout;
-    globalThis.clearTimeout = realClearTimeout;
+    controller?.dispose();
   }
 });

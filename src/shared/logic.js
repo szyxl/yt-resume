@@ -279,6 +279,12 @@
 
     return entries
       .sort(([firstKey, first], [secondKey, second]) => {
+        const firstIsTombstone = first?.deleted === true;
+        const secondIsTombstone = second?.deleted === true;
+        if (firstIsTombstone !== secondIsTombstone) {
+          return firstIsTombstone ? -1 : 1;
+        }
+
         const firstUpdatedAt = Number(first?.updatedAt) || 0;
         const secondUpdatedAt = Number(second?.updatedAt) || 0;
         return firstUpdatedAt - secondUpdatedAt || firstKey.localeCompare(secondKey);

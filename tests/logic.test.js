@@ -19,7 +19,7 @@ const {
   selectProgressKeysForEviction,
   shouldAcceptWrite,
   shouldRestoreCheckpoint,
-} = require("../firefox/logic.js");
+} = require("../src/shared/logic.js");
 
 test("parses standard YouTube watch URLs by video ID", () => {
   assert.deepEqual(parseVideoContext("https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PL123"), {
@@ -201,4 +201,18 @@ test("storage eviction keeps the newest bounded set", () => {
 
   assert.deepEqual(selectProgressKeysForEviction(stored, incomingKey), [progressKey("00000000000")]);
   assert.deepEqual(selectProgressKeysForEviction(stored, progressKey("00000000500")), []);
+});
+
+test("storage eviction removes tombstones before live checkpoints", () => {
+  const tombstoneKey = progressKey("deleted0001");
+  const stored = {
+    [progressKey("livevideo01")]: { updatedAt: 1 },
+    [progressKey("livevideo02")]: { updatedAt: 2 },
+    [tombstoneKey]: { deleted: true, updatedAt: 3 },
+  };
+
+  assert.deepEqual(
+    selectProgressKeysForEviction(stored, progressKey("newvideo001"), 3),
+    [tombstoneKey],
+  );
 });

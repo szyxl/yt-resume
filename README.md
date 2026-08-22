@@ -32,12 +32,18 @@ npm run start:firefox
 npm run start:chromium
 ```
 
-`npm start` is an alias for `npm run start:firefox`.
+`npm start` is an alias for `npm run start:firefox`. Shared runtime files live in `src/shared/`; browser-specific manifests and entry points live in `src/firefox/` and `src/chromium/`. Development, test, lint, and build commands assemble loadable extensions under `dist/`. The start commands keep those generated files synchronized while they run.
 
-To load the extension manually:
+To refresh both generated extensions without starting a browser:
 
-- **Firefox:** open `about:debugging`, choose **This Firefox**, select **Load Temporary Add-on**, and choose `firefox/manifest.json`.
-- **Chromium:** open `chrome://extensions`, enable **Developer mode**, select **Load unpacked**, and choose the `chromium/` directory.
+```bash
+npm run prepare:dist
+```
+
+To load the extension manually after running `npm ci` or `npm run prepare:dist`:
+
+- **Firefox:** open `about:debugging`, choose **This Firefox**, select **Load Temporary Add-on**, and choose `dist/firefox/manifest.json`.
+- **Chromium:** open `chrome://extensions`, enable **Developer mode**, select **Load unpacked**, and choose the `dist/chromium/` directory.
 
 ## Build
 

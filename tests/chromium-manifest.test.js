@@ -8,7 +8,7 @@ const path = require("node:path");
 const projectRoot = path.resolve(__dirname, "..");
 
 function readManifest(platform) {
-  return JSON.parse(fs.readFileSync(path.join(projectRoot, platform, "manifest.json"), "utf8"));
+  return JSON.parse(fs.readFileSync(path.join(projectRoot, "src", platform, "manifest.json"), "utf8"));
 }
 
 test("Chromium manifest uses only a Manifest V3 service worker", () => {

@@ -35,7 +35,7 @@
   }
 
   function addMessageListener(listener) {
-    api.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    const handleMessage = (message, sender, sendResponse) => {
       if (!usesChromiumMessaging) {
         return listener(message, sender);
       }
@@ -57,7 +57,10 @@
         (error) => sendResponse(errorResponse(error)),
       );
       return true;
-    });
+    };
+
+    api.runtime.onMessage.addListener(handleMessage);
+    return () => api.runtime.onMessage.removeListener(handleMessage);
   }
 
   if (!nativeBrowser) {

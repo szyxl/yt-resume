@@ -1,5 +1,6 @@
 {
   "manifest_version": 3,
+  "minimum_chrome_version": "99.0",
   "name": "YT Resume",
   "version": "0.2.9",
   "description": "Privately saves and restores YouTube playback positions in this browser profile.",
@@ -13,11 +14,7 @@
     "storage"
   ],
   "background": {
-    "scripts": [
-      "browser-api.js",
-      "logic.js",
-      "background.js"
-    ]
+    "service_worker": "background-worker.js"
   },
   "action": {
     "default_title": "YT Resume",
@@ -35,6 +32,7 @@
       "js": [
         "browser-api.js",
         "logic.js",
+        "playback-session.js",
         "content.js"
       ],
       "css": [
@@ -47,19 +45,5 @@
     "page": "options.html",
     "open_in_tab": true
   },
-  "incognito": "not_allowed",
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "yt-resume@szyxl.github.io",
-      "strict_min_version": "140.0",
-      "data_collection_permissions": {
-        "required": [
-          "none"
-        ]
-      }
-    },
-    "gecko_android": {
-      "strict_min_version": "142.0"
-    }
-  }
+  "incognito": "not_allowed"
 }
